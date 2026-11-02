@@ -11,7 +11,7 @@ apps/web          ← import @prompt-grader/engine
 
 ไม่มีแพ็กเกจเซิร์ฟเวอร์ แอปเป็น static site ทั้งหมด
 
-กฎ dependency (ตรวจด้วย `eslint-plugin-boundaries` หรือ `dependency-cruiser`):
+กฎ dependency (ตรวจด้วย `no-restricted-imports` ของ ESLint ใน `eslint.config.mjs`):
 - `engine/schema` ← ใช้ได้ทุกที่
 - `engine/cpu`, `engine/stats` ← ห้าม import `gl/`
 - `engine/gl` ← import `schema` ได้
@@ -37,8 +37,9 @@ src/
     histogram.ts       histogram 256 bins × 4 ช่อง
   cpu/
     detail.ts          denoise + sharpen 3×3 (แบบ strip ที่มี padding)
-    grade.ts           gradePixels(orig, src, dst, w, rows, y0, W, H, params, ctx)
-                       (orig = ก่อน detail ใช้กับ mix, src = หลัง detail)
+    grade.ts           gradePixels(orig, src, dst, w, rows, y0, params, ctx)
+                       (orig = ก่อน detail ใช้กับ mix, src = หลัง detail, ขนาดภาพเต็มอยู่ใน ctx)
+                       gradeImage(src, w, h, params, ctx, stripRows) รวม detail + grade ทีละแถบ
     worker.ts          Worker entry: รับ ImageData strip → คืนผล
   gl/
     renderer.ts        class GradeRenderer { setImage(), setParams(), render(), exportTiles() }
@@ -50,7 +51,9 @@ src/
     tiles.ts           วางแผนไทล์ + ขอบซ้อน
   index.ts
 test/
-  identity, extremes, tiling, bw, clamp, migrate, golden .test.ts
+  identity, extremes, tiling, bw, schema, migrate, prototype, golden .test.ts
+  support/             ภาพสังเคราะห์, อ่าน/เขียน PNG, ตัวโหลดต้นแบบ (ใช้ร่วมกับ scripts/)
+  (prototype.test.ts รันโค้ดจริงจาก reference/prototype-v3.html แล้วเทียบทุกพิกเซล)
   sgp.test.ts          พอร์ตทุกเคสจาก reference/sgp-reference.test.mjs + เคสเพิ่ม
 ```
 

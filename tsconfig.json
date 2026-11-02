@@ -2,6 +2,7 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2023", "DOM"],
+    "allowImportingTsExtensions": true,
     "types": ["node"]
   },
   "include": ["scripts", "tests/e2e", "playwright.config.ts"]

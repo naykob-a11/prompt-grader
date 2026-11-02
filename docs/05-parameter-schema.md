@@ -7,7 +7,7 @@
 ```ts
 export const PARAMS = [
   { key: 'exposure', group: 'light', label: { th: 'ความสว่าง (EV)', en: 'Exposure' },
-    min: -100, max: 100, default: 0, step: 1, kind: 'linear',
+    min: -100, max: 100, default: 0, step: 1, kind: 'signed',
     desc: 'brightness, ±100 = ±1 stop', since: 2 },
   // ...
 ] as const satisfies readonly ParamDef[];

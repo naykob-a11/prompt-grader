@@ -25,6 +25,8 @@
 
 `pnpm fixtures:synthetic` สร้าง `synthetic-ramps.png` ใหม่ได้ทุกเมื่อ (deterministic)
 
+ตอนนี้ golden อ่านเฉพาะไฟล์ `.png` เมื่อเพิ่มภาพถ่าย `.jpg` ต้องเพิ่มตัวถอดรหัส JPEG ใน `test/support/images.ts` ด้วย
+
 ## 3. Golden workflow
 
 ```

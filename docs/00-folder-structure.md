@@ -61,7 +61,7 @@ prompt-grader/
 │       │   ├── stats/{grayWorld,histogram,imageStats}.ts
 │       │   ├── cpu/{grade,detail,worker}.ts
 │       │   └── gl/{renderer,uniforms,tiles}.ts + shaders/{fullscreen.vert,detail.frag,grade.frag}
-│       └── test/{identity,extremes,tiling,bw,clamp,migrate,golden,sgp}.test.ts
+│       └── test/{identity,extremes,tiling,bw,schema,migrate,prototype,golden,sgp}.test.ts, test/support/, scripts/{exportSchema,renderPreset}.ts
 │
 ├── apps/
 │   └── web/                           🔨 Vite + React 18 + TypeScript (static, ไม่มี backend)
