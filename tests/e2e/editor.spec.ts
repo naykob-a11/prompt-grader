@@ -35,7 +35,7 @@ for (const { name, tabs, ...viewport } of viewports) {
       const graded = await shot(page);
       expect(graded.equals(initial)).toBe(false);
 
-      if (tabs) await page.getByRole('tab', { name: 'ปรับ' }).click();
+      if (tabs) await page.getByRole('tab', { name: 'ปรับ', exact: true }).click();
       await page.getByLabel('ความสว่าง (EV)').fill('60');
       await page.getByLabel('ความสว่าง (EV)').dispatchEvent('pointerup');
       const brighter = await shot(page);

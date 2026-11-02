@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto';
-import { BUILTIN_PRESETS, DEFAULT_PARAMS } from '@prompt-grader/engine';
+import { BUILTIN_PRESETS, DEFAULT_PARAMS, parseSGP } from '@prompt-grader/engine';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { PromptDb } from '../storage/db';
 import { loadSettings, saveSetting } from '../storage/settings';
@@ -35,13 +35,32 @@ describe('library store', () => {
     expect(second.name).toBe('ซ้ำ (2)');
   });
 
-  test('saving parameters updates the row and its time', async () => {
+  test('saving content updates the row, its time and its text', async () => {
     const record = await store.getState().create({ name: 'ก', params: DEFAULT_PARAMS });
     await new Promise((resolve) => setTimeout(resolve, 2));
-    await store.getState().saveParams(record.id, { ...DEFAULT_PARAMS, grain: 9 });
+    const params = { ...DEFAULT_PARAMS, grain: 9 };
+    await store.getState().saveContent(record.id, { params, tags: ['ข'], notes: 'โน้ต' });
     const [saved] = await reopened();
     expect(saved!.params.grain).toBe(9);
     expect(saved!.updatedAt).toBeGreaterThan(record.updatedAt);
+    const parsed = parseSGP(saved!.prompt);
+    expect(parsed.params).toEqual(params);
+    expect([parsed.name, parsed.tags, parsed.notes]).toEqual(['ก', ['ข'], 'โน้ต']);
+  });
+
+  test('a new prompt gets SGP text, and a rename updates it', async () => {
+    const params = { ...DEFAULT_PARAMS, shadows: 30 };
+    const record = await store.getState().create({ name: 'ก', params, notes: 'โน้ต' });
+    expect(parseSGP(record.prompt).params).toEqual(params);
+    await store.getState().rename(record.id, 'ข');
+    const [saved] = await reopened();
+    expect(parseSGP(saved!.prompt).name).toBe('ข');
+  });
+
+  test('a row saved without text gets it when loaded', async () => {
+    const record = await store.getState().create({ name: 'ก', params: DEFAULT_PARAMS });
+    await db.prompts.put({ ...record, prompt: '' });
+    expect((await reopened())[0]!.prompt).toContain('ก');
   });
 
   test('rename keeps names unique but may keep its own name', async () => {

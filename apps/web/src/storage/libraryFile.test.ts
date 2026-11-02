@@ -1,4 +1,4 @@
-import { DEFAULT_PARAMS, SCHEMA_VERSION } from '@prompt-grader/engine';
+import { DEFAULT_PARAMS, parseSGP, SCHEMA_VERSION } from '@prompt-grader/engine';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
@@ -85,10 +85,21 @@ describe('parseLibraryFile', () => {
     expect(skipped).toBe(3);
   });
 
-  test('skips items that have prompt text but no parameters, until P5 can read them', () => {
-    const { records, skipped } = parse(file([{ name: 'ข้อความล้วน', prompt: 'เงา: ยก' }]));
-    expect(records).toEqual([]);
-    expect(skipped).toBe(1);
+  test('reads items that have prompt text but no parameters', () => {
+    const { records, skipped } = parse(file([{ name: 'ข้อความล้วน', prompt: 'เงา: ยก (+30)' }]));
+    expect(records[0]!.params.shadows).toBe(30);
+    expect(skipped).toBe(0);
+  });
+
+  test('parameters win over the text, which is rewritten to match them', () => {
+    const text = file([{ name: 'ก', prompt: 'เงา: ยก (+30)', params: { shadows: 10 } }]);
+    const [record] = parse(text).records;
+    expect(record!.params.shadows).toBe(10);
+    expect(parseSGP(record!.prompt).params.shadows).toBe(10);
+  });
+
+  test('an item with neither text nor parameters is skipped', () => {
+    expect(parse(file([{ name: 'ว่าง' }])).skipped).toBe(1);
   });
 
   test('cuts names and tags to their limits', () => {
@@ -128,7 +139,7 @@ describe('serializeLibrary', () => {
     const record: PromptRecord = {
       id: 'x',
       name: 'เก็บไว้',
-      prompt: 'เงา: ยก',
+      prompt: '',
       freeText: 'lifted shadows',
       params: { ...DEFAULT_PARAMS, shadows: 30 },
       schemaVersion: SCHEMA_VERSION,
@@ -143,7 +154,6 @@ describe('serializeLibrary', () => {
     expect(skipped).toBe(0);
     expect(records[0]).toMatchObject({
       name: 'เก็บไว้',
-      prompt: 'เงา: ยก',
       freeText: 'lifted shadows',
       params: record.params,
       notes: 'โน้ต',

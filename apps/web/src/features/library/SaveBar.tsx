@@ -3,9 +3,10 @@ import { t } from '../../i18n';
 import { saveAsNew, saveCurrent } from '../../services/prompts';
 import { hasUnsavedChanges, useEditor } from '../../store/editorStore';
 import { libraryStore, useLibrary } from '../../store/libraryStore';
+import { hasUnsavedMeta, promptStore, usePrompt } from '../../store/promptStore';
 
 function NameForm() {
-  const [name, setName] = useState(t('library.newName'));
+  const [name, setName] = useState(promptStore.getState().meta.name || t('library.newName'));
   const { setNaming } = libraryStore.getState();
 
   const onSubmit = (event: FormEvent) => {
@@ -42,7 +43,9 @@ function NameForm() {
 
 export function SaveBar() {
   const naming = useLibrary((s) => s.naming);
-  const dirty = useEditor(hasUnsavedChanges);
+  const paramsChanged = useEditor(hasUnsavedChanges);
+  const metaChanged = usePrompt(hasUnsavedMeta);
+  const dirty = paramsChanged || metaChanged;
   const promptId = useEditor((s) => s.promptId);
   const canOverwrite = useLibrary((s) => s.prompts.some((p) => p.id === promptId));
 

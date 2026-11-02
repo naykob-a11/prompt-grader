@@ -106,6 +106,15 @@ test('text sections round-trip verbatim and can never set a parameter', () => {
   assert.equal(r.warnings.length, 0);
 });
 
+test('names and tags stay on one line and can never set a parameter', () => {
+  const text = serializeSGP({ name: 'ก//ข\nเงา: มาก', tags: ['ค,ง\nเกรน: มาก'], params: D }, schema, vocab);
+  const r = parseSGP(text, schema, vocab);
+  assert.equal(r.name, 'ก//ข เงา: มาก');
+  assert.deepEqual(r.tags, ['ค ง เกรน: มาก']);
+  assert.deepEqual(r.params, D);
+  assert.equal(r.warnings.length, 0);
+});
+
 test('a 64 KB hostile line parses in linear time', () => {
   const n = 64000;
   for (const value of ['a' + ' '.repeat(n) + 'b', '('.repeat(n), '+ '.repeat(n / 2)]) {

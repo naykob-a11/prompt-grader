@@ -25,7 +25,7 @@ export interface SgpResult {
 export function parseSGP(text: string): SgpResult;
 export function serializeSGP(p: { name?: string; tags?: string[]; params: Params; notes?: string; preserve?: string }): string;
 export function buildTemplate(): string;               // every heading with `ไม่ปรับ`
-export function buildBridgeInstruction(freeText: string): string;
+export function buildBridgeInstruction(template: string, freeText: string): string; // the app reads the template file
 ```
 
 Acceptance: copy every test from `reference/sgp-reference.test.mjs` into `test/sgp.test.ts` unchanged in meaning, then add fuzz (`fast-check`) and a 2,000-line benchmark (< 20 ms).

@@ -46,7 +46,7 @@ prompt-grader/
 ├── reference/
 │   ├── prototype-v3.html              ✅ ต้นแบบเครื่องยนต์ที่ทำงานได้จริง (ปุ่ม AI ในต้นแบบไม่อยู่ในแบบใหม่)
 │   ├── sgp-reference.mjs              ✅ ตัวอ่าน/ตัวเขียนพร้อมต์อ้างอิง (Node ≥ 20)
-│   └── sgp-reference.test.mjs         ✅ 17 เคส = เกณฑ์ยอมรับของ port (`node --test reference/sgp-reference.test.mjs`)
+│   └── sgp-reference.test.mjs         ✅ 18 เคส = เกณฑ์ยอมรับของ port (`node --test reference/sgp-reference.test.mjs`)
 │
 ├── packages/
 │   └── engine/                        🔨 @prompt-grader/engine
@@ -75,14 +75,14 @@ prompt-grader/
 │           ├── config/envSchema.ts    ตรวจตัวแปร VITE_* ด้วย zod (ใช้ร่วมกับ vite.config.ts)
 │           ├── i18n/{th,en}.json
 │           ├── theme/tokens.css
-│           ├── store/{editorStore,libraryStore}.ts
+│           ├── store/{editorStore,libraryStore,promptStore}.ts
 │           ├── storage/{db,settings,libraryFile}.ts
-│           ├── services/{imageIO,openImage,sampleImage,prompts,promptFiles,clipboard}.ts
+│           ├── services/{imageIO,openImage,sampleImage,prompts,promptSync,promptFiles,builtinText,clipboard,download}.ts
 │           ├── features/
 │           │   ├── stage/             Stage (canvas, ซูม/เลื่อน), CompareSlider, Histogram, useRenderer
 │           │   ├── controls/          Controls, ParamGroup, ParamSlider (รวมแถบสี kind: 'hue')
 │           │   ├── library/           LibraryPanel, PromptItem, SaveBar, ImportExport
-│           │   ├── prompt-editor/     PromptEditor, WarningList, AttachButton, TemplateButton,
+│           │   ├── prompt-editor/     PromptPanel, PromptEditor, sgpLanguage, WarningList,
 │           │   │                      ChatBridgeDialog, NotesPanel
 │           │   └── export/            ExportDialog, Progress
 │           └── shared/                Button, Dialog, Toast, useHotkeys

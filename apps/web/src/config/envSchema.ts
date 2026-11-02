@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+// Otherwise zod probes `new Function` for speed, which the CSP reports as a violation.
+z.config({ jitless: true });
+
 const bool = (fallback: boolean) =>
   z
     .enum(['true', 'false'])

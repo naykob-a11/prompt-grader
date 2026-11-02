@@ -10,7 +10,7 @@ argument-hint: "[patch|minor|major]"
 Spec: `docs/12-deployment.md`.
 
 1. Confirm the working tree is clean and on `main`. Stop if not.
-2. Run the `verify` checklist in full, including `pnpm test:e2e`.
+2. Run the `verify` checklist in full, including `pnpm test:e2e`, plus `E2E_SWIFTSHADER=false pnpm test:e2e -- parity benchmark` on a machine with a real GPU, which CI does not have.
 3. Bump versions (`$ARGUMENTS`, default patch) in root and package `package.json` files. Update `CHANGELOG.md` from commits since the last tag, grouped as เพิ่ม / แก้ไข / เปลี่ยนแปลง, written in Thai for users.
 4. `pnpm build`. Check bundle size of `apps/web/dist` against the previous release; flag growth > 15%.
 5. Show the user the changelog and versions and **wait for confirmation** before tagging or deploying.

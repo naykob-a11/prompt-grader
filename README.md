@@ -28,7 +28,7 @@
 ```bash
 cd prompt-grader
 git init && git add . && git commit -m "chore: project kit"
-node --test reference/sgp-reference.test.mjs   # ตรวจตัวอ่านอ้างอิง (Node ≥ 20) — ควรผ่าน 17/17
+node --test reference/sgp-reference.test.mjs   # ตรวจตัวอ่านอ้างอิง (Node ≥ 20) — ควรผ่าน 18/18
 claude                                         # เปิด Claude Code แล้ววางคำสั่งระยะ P0 จาก playbook
 ```
 

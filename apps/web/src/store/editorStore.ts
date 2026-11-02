@@ -54,7 +54,11 @@ export interface EditorState extends Snapshot {
   markSaved(prompt: PromptRef): void;
   /** Detaches the editor from a deleted prompt, keeping the current parameters. */
   forgetPrompt(id: string): void;
+  /** Starts unsaved work that belongs to no prompt, such as an attached file. */
+  detachPrompt(): void;
   setParam(key: ParamKey, value: number): void;
+  /** Replaces all parameters as one undo step, keeping the current prompt. */
+  applyParams(params: Params): void;
   commitEdit(): void;
   resetParam(key: ParamKey): void;
   resetAll(): void;
@@ -117,11 +121,18 @@ export function createEditorStore({ undoLimit, presetId, compareMode }: EditorOp
         if (get().promptId === id) set({ promptId: null, baseline: null });
       },
 
+      detachPrompt: () => set({ promptId: null, baseline: null }),
+
       setParam: (key, value) =>
         set((s) => ({
           params: { ...s.params, [key]: value },
           editBase: s.editBase ?? snapshot(),
         })),
+
+      applyParams: (params) => {
+        const { promptId, baseline } = get();
+        applyStep({ params, promptId, baseline });
+      },
 
       commitEdit: () => {
         const { editBase, params, past } = get();

@@ -196,7 +196,7 @@ export function parseSGP(text, schema, vocab) {
     if (sec) { section = idx.sectionKind.get(norm(sec[1])) || 'settings'; return; }
     // meta line: "# key: value"
     if (line.startsWith('#')) {
-      const m = line.replace(/^#+/, '').match(/^([^:：]+)[:：](.*)$/);
+      const m = raw.replace(/^#+/, '').match(/^([^:：]+)[:：](.*)$/);
       if (m) {
         const kind = idx.meta.get(norm(m[1]));
         if (kind === 'name') res.name = m[2].trim().slice(0, 80);
@@ -261,6 +261,8 @@ function nearestColor(vocab, hue) {
   return best.words[0];
 }
 const signed = (v) => (v > 0 ? '+' + v : String(v));
+const metaValue = (s) => s.replace(/\s+/g, ' ').trim();
+const metaTag = (s) => s.replace(/[,،、\s]+/g, ' ').trim();
 /** Text-section lines; anything the parser would read as structure gets a leading backslash. */
 const textLines = (t) => t.trim().split(/\r\n?|\n/).map((l) => l.trim()).map((l) => (/^(\\|\[|#|```)/.test(l) ? '\\' + l : l));
 
@@ -269,8 +271,8 @@ export function serializeSGP(preset, schema, vocab) {
   const p = { ...defaultParams(schema), ...preset.params };
   const vp = Object.fromEntries(vocab.params.map((x) => [x.key, x]));
   const out = [];
-  if (preset.name) out.push(`# ${vocab.meta.name[0]}: ${preset.name}`);
-  if (preset.tags && preset.tags.length) out.push(`# ${vocab.meta.tags[0]}: ${preset.tags.join(', ')}`);
+  if (preset.name) out.push(`# ${vocab.meta.name[0]}: ${metaValue(preset.name)}`);
+  if (preset.tags && preset.tags.length) out.push(`# ${vocab.meta.tags[0]}: ${preset.tags.map(metaTag).join(', ')}`);
   out.push(`# ${vocab.meta.version[0]}: ${vocab.version}`);
   if (p.amount !== defs.amount.default) out.push('', `${vp.amount.aliases[0]}: ${p.amount}`);
 

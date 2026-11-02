@@ -1,6 +1,7 @@
 export * from './schema';
 export * from './presets';
 export { migrateParams } from './migrate';
+export * from './sgp';
 export { grayWorld } from './stats/grayWorld';
 export { histogram, type Histogram } from './stats/histogram';
 export { detail } from './cpu/detail';

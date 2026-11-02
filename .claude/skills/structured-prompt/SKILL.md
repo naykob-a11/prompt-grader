@@ -31,7 +31,8 @@ Follow `porting-notes.md`. Port behavior exactly, then improve only with a spec 
 ## Editor behavior (apps/web/features/prompt-editor)
 - Parse 150 ms after typing stops; `Ctrl+Enter` parses immediately.
 - Warnings: underline the line, tooltip with the message, list below the editor; unknown headings get "หมายถึง …" suggestions from `suggest.ts`.
-- Slider → text sync replaces only the settings part; keep meta lines, `[หมายเหตุ]`, `[ห้ามเปลี่ยน]`, and the user's comment lines where possible. Guard against loops with a change-source flag.
+- Slider → text sync rewrites the text from the sliders, keeping the name, tags, `[หมายเหตุ]` and `[ห้ามเปลี่ยน]`. `//` comments do not survive it. Guard against loops with a change-source flag.
+- The editor runs in a shadow root on purpose: outside one, CodeMirror adds a `<style>` tag, which the CSP blocks. `tests/e2e/csp.spec.ts` checks this.
 - Chat bridge dialog: show the exact text that will be copied; fall back to a selectable textarea if the clipboard is refused; state plainly that no image is included.
 
 ## When a user reports "my prompt was read wrong"

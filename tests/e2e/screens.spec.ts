@@ -13,6 +13,21 @@ for (const colorScheme of ['light', 'dark'] as const) {
     });
   }
 
+  for (const width of [360, 1440]) {
+    test(`${colorScheme} prompt editor at ${width} px`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto('/');
+      await page.getByRole('tab', { name: 'พร้อมต์', exact: true }).click();
+      await page.getByRole('textbox', { name: 'ข้อความพร้อมต์' }).click();
+      await page.keyboard.press('Control+Home');
+      await page.keyboard.insertText('หัวข้อผิด: มาก\n');
+      await expect(page.getByText('1 บรรทัดที่อ่านไม่ได้')).toBeVisible();
+      await page.waitForTimeout(200);
+      await page.screenshot({ path: `test-results/screens/${colorScheme}-prompt-${width}.png` });
+    });
+  }
+
   test(`${colorScheme} hue sliders`, async ({ page }) => {
     await page.emulateMedia({ colorScheme });
     await page.goto('/');

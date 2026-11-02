@@ -1,4 +1,10 @@
-import { BUILTIN_PRESETS, SCHEMA_VERSION, migrateParams, type Params } from '@prompt-grader/engine';
+import {
+  BUILTIN_PRESETS,
+  SCHEMA_VERSION,
+  migrateParams,
+  serializeSGP,
+  type Params,
+} from '@prompt-grader/engine';
 import { ulid } from 'ulid';
 import { useStore } from 'zustand';
 import { createStore } from 'zustand/vanilla';
@@ -47,7 +53,22 @@ export interface NewPrompt {
   freeText?: string;
   notes?: string;
   preserve?: string;
+  source?: PromptRecord['source'];
 }
+
+/** The parts of a saved prompt that the editor can change. */
+export type PromptContent = Pick<PromptRecord, 'params' | 'tags' | 'notes' | 'preserve'>;
+
+const textOf = (record: Pick<PromptRecord, 'name' | keyof PromptContent>) => {
+  const { name, params, tags, notes, preserve } = record;
+  return serializeSGP({
+    name,
+    params,
+    tags,
+    ...(notes !== undefined && { notes }),
+    ...(preserve !== undefined && { preserve }),
+  });
+};
 
 export interface LibraryState {
   prompts: PromptRecord[];
@@ -58,7 +79,7 @@ export interface LibraryState {
 
   load(): Promise<void>;
   create(input: NewPrompt): Promise<PromptRecord>;
-  saveParams(id: string, params: Params): Promise<void>;
+  saveContent(id: string, content: PromptContent): Promise<void>;
   rename(id: string, name: string): Promise<void>;
   remove(id: string): Promise<void>;
   addAll(records: PromptRecord[]): Promise<void>;
@@ -90,25 +111,29 @@ export function createLibraryStore(db: PromptDb) {
 
       load: async () => {
         const rows = await db.prompts.toArray();
-        const prompts = rows.map((row) => ({
-          ...row,
-          params: migrateParams(row.params, row.schemaVersion),
-          schemaVersion: SCHEMA_VERSION,
-        }));
+        const prompts = rows.map((row) => {
+          const migrated = {
+            ...row,
+            params: migrateParams(row.params, row.schemaVersion),
+            schemaVersion: SCHEMA_VERSION,
+          };
+          // Prompts saved before the SGP serializer existed have no text yet.
+          return { ...migrated, prompt: row.prompt || textOf(migrated) };
+        });
         set({ prompts: prompts.sort(newestFirst) });
       },
 
-      create: async ({ name, params, tags = [], ...text }) => {
+      create: async ({ name, params, tags = [], source = 'user', ...text }) => {
         const now = Date.now();
+        const unique = uniqueName(name, new Set(get().prompts.map((p) => p.name)));
         const record: PromptRecord = {
           id: ulid(now),
-          name: uniqueName(name, new Set(get().prompts.map((p) => p.name))),
-          // Phase P5 fills this in with serializeSGP().
-          prompt: '',
+          name: unique,
+          prompt: textOf({ name: unique, params, tags, ...text }),
           params,
           schemaVersion: SCHEMA_VERSION,
           tags,
-          source: 'user',
+          source,
           createdAt: now,
           updatedAt: now,
           ...text,
@@ -118,11 +143,17 @@ export function createLibraryStore(db: PromptDb) {
         return record;
       },
 
-      saveParams: (id, params) => patch(id, { params, schemaVersion: SCHEMA_VERSION }),
+      saveContent: (id, content) => {
+        const current = get().prompts.find((p) => p.id === id)!;
+        const next = { ...current, ...content };
+        return patch(id, { ...content, prompt: textOf(next), schemaVersion: SCHEMA_VERSION });
+      },
 
       rename: (id, name) => {
+        const current = get().prompts.find((p) => p.id === id)!;
         const others = get().prompts.filter((p) => p.id !== id);
-        return patch(id, { name: uniqueName(name, new Set(others.map((p) => p.name))) });
+        const unique = uniqueName(name, new Set(others.map((p) => p.name)));
+        return patch(id, { name: unique, prompt: textOf({ ...current, name: unique }) });
       },
 
       remove: async (id) => {

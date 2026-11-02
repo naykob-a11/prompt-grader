@@ -17,6 +17,8 @@
   "negative": ["ลด", "น้อยลง", "ลง", "less", "decrease", "lower", "down"],
   "neutral":  ["ไม่ปรับ", "ปิด", "ไม่มี", "คงเดิม", "none", "off", "neutral"],
 
+  "degreeWords": ["°", "องศา"],
+
   "colors": [
     { "hue": 0,   "words": ["แดง", "red"] },
     { "hue": 30,  "words": ["ส้ม", "orange"] },
@@ -89,6 +91,25 @@
     { "prefix": "l", "aliases": ["ความสว่าง", "สว่าง", "luminance", "lum"] },
     { "prefix": "h", "aliases": ["เฉดสี", "เฉด", "hue"] }
   ],
+
+  "sectionTitles": {
+    "light": "แสง",
+    "color": "สี",
+    "foliage": "ใบไม้",
+    "split": "โทนเงาและไฮไลต์",
+    "bands": "ปรับรายสี",
+    "atmosphere": "บรรยากาศและฟิล์ม",
+    "detail": "รายละเอียด"
+  },
+  "messages": {
+    "noColon": "ไม่มีเครื่องหมาย \":\" — ข้ามบรรทัดนี้",
+    "unknownHeading": "ไม่รู้จักหัวข้อ \"{heading}\"",
+    "noValue": "ไม่พบคำบอกระดับหรือตัวเลข",
+    "noNegative": "ค่านี้ไม่มีทิศลบ ใช้ค่าต่ำสุดแทน",
+    "tintNeedsColor": "ระบุสีด้วยชื่อสีหรือองศา เช่น \"เขียวอมฟ้า\" หรือ \"188°\"",
+    "bandNeedsAttribute": "ไม่รู้ว่า \"{part}\" ปรับอะไร ขึ้นต้นด้วย อิ่ม / สว่าง / เฉด",
+    "duplicate": "ตั้งค่า {key} ซ้ำ (บรรทัด {line}) ใช้ค่าบรรทัดล่าสุด"
+  },
 
   "sections": {
     "notes": ["หมายเหตุ", "notes", "note"],

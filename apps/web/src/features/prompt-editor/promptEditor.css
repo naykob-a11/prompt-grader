@@ -1,0 +1,153 @@
+/* The text scrolls inside its box, so the toolbar and the warnings stay on screen. */
+.prompt-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+}
+
+.panel-controls > .prompt-panel {
+  flex: 1;
+}
+
+.prompt-panel > * {
+  flex: none;
+}
+
+.prompt-panel > .prompt-editor {
+  flex: 1 1 240px;
+}
+
+.prompt-panel > .warning-list,
+.prompt-panel > .notes-panel {
+  max-height: 25%;
+  overflow-y: auto;
+}
+
+@media (max-width: 819px) {
+  .prompt-panel > .prompt-editor {
+    height: 60vh;
+    flex: none;
+  }
+
+  .prompt-panel > .warning-list,
+  .prompt-panel > .notes-panel {
+    max-height: none;
+  }
+}
+
+.prompt-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.prompt-toolbar button {
+  padding: 0 var(--space-2);
+  font-size: 13px;
+}
+
+.prompt-confirm-template {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+}
+
+.prompt-editor {
+  min-width: 0;
+  min-height: 240px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.warning-none {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.warning-count {
+  margin: 0 0 var(--space-1);
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.warning-list ul {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.warning-list button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  font-size: 13px;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.warning-line {
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+
+.warning-suggestion {
+  color: var(--accent);
+}
+
+.notes-panel {
+  display: grid;
+  gap: var(--space-2);
+  font-size: 13px;
+}
+
+.notes-panel h3 {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.notes-panel p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.bridge {
+  width: min(560px, calc(100vw - 32px));
+  max-width: none;
+}
+
+.bridge[open] {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.bridge p {
+  margin: 0;
+}
+
+.bridge textarea {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 13px;
+}
+
+.bridge-privacy,
+.bridge-status {
+  color: var(--muted);
+  font-size: 13px;
+}

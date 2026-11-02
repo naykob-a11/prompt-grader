@@ -124,6 +124,16 @@ button[aria-selected='true'] {
   flex: 1;
 }
 
+.side-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.side-tabs button {
+  flex: 1;
+}
+
 .panel {
   min-width: 0;
   min-height: 0;
@@ -138,8 +148,14 @@ button[aria-selected='true'] {
 }
 
 .panel-controls {
+  display: flex;
+  flex-direction: column;
   grid-area: controls;
   border-inline-start: 1px solid var(--line);
+}
+
+.panel-controls > * {
+  flex: none;
 }
 
 @media (max-width: 1199px) {
@@ -170,6 +186,10 @@ button[aria-selected='true'] {
 
   .tabs {
     display: flex;
+  }
+
+  .side-tabs {
+    display: none;
   }
 
   .panel {

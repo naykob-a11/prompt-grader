@@ -29,7 +29,7 @@ src/
     parse.ts           parseSGP(text) → {params, name, tags, notes, preserve, warnings, matched}
     serialize.ts       serializeSGP(preset) → text (round-trip กับ parse)
     suggest.ts         แนะนำหัวข้อที่สะกดใกล้เคียง (Levenshtein บนคำที่ normalize แล้ว)
-    template.ts        แม่แบบทุกหัวข้อ, buildBridgeInstruction(freeText)
+    template.ts        แม่แบบทุกหัวข้อ, buildBridgeInstruction(template, freeText)
   migrate.ts           migrateParams(params, fromVersion) → params ปัจจุบัน
   math.ts              smoothstep, hueOffset(), hash2() — ใช้ร่วม CPU/อ้างอิงใน GLSL
   stats/
@@ -119,7 +119,7 @@ src/
 - UI แถบเลื่อน **สร้างจาก schema** ห้ามเขียนแถบเลื่อนด้วยมือทีละตัว
 - state ของ params เป็น object เดียว เปลี่ยนแบบ immutable เพื่อทำ undo ได้ง่าย
 - การเรนเดอร์ไม่ผูกกับ React render cycle: store subscribe → renderer.setParams()
-- **การซิงก์ข้อความ ↔ แถบเลื่อน:** store เก็บ `params` เป็นความจริง; แก้ข้อความ → parse → `params`; แก้แถบเลื่อน → `params` → serialize แทนที่ส่วนการตั้งค่าของข้อความ (คงบรรทัดข้อมูลกำกับ, `[หมายเหตุ]`, `[ห้ามเปลี่ยน]`) ป้องกันวนซ้ำด้วย flag แหล่งที่มาของการเปลี่ยนแปลง
+- **การซิงก์ข้อความ ↔ แถบเลื่อน (`services/promptSync.ts`):** store เก็บ `params` เป็นความจริง; แก้ข้อความ → parse → `params`; แก้แถบเลื่อน → `params` → serialize เขียนข้อความใหม่ทั้งหมด โดยคงชื่อ, แท็ก, `[หมายเหตุ]`, `[ห้ามเปลี่ยน]` ส่วนคอมเมนต์ `//` และลำดับบรรทัดที่ผู้ใช้จัดเองจะหายไป ป้องกันวนซ้ำด้วย flag แหล่งที่มาของการเปลี่ยนแปลง
 
 ## 4. ไม่มี backend
 

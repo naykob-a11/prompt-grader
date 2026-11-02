@@ -6,6 +6,10 @@ import { LibraryFileError, parseLibraryFile, serializeLibrary } from '../storage
 import { loadSettings, saveSetting } from '../storage/settings';
 import { editorStore, hasUnsavedChanges } from '../store/editorStore';
 import { BUILTIN_VIEWS, libraryStore, toView, type PromptView } from '../store/libraryStore';
+import { hasUnsavedMeta, promptStore } from '../store/promptStore';
+import { BUILTIN_TEXT } from './builtinText';
+import { downloadText } from './download';
+import { flushTyping, markMetaSaved, startPromptSync } from './promptSync';
 
 const DAY_MS = 86_400_000;
 
@@ -18,6 +22,7 @@ const reportStorageError = () => showToast(t('error.storage'), 'error');
 
 /** Loads saved prompts and settings, then keeps the settings in step with the editor. */
 export async function initLibrary(): Promise<void> {
+  startPromptSync();
   try {
     await libraryStore.getState().load();
     const settings = await loadSettings(db);
@@ -54,9 +59,11 @@ export function selectPrompt(view: PromptView): void {
 }
 
 export async function saveAsNew(name: string): Promise<void> {
-  const params = editorStore.getState().params;
+  flushTyping();
+  const { params } = editorStore.getState();
+  const { tags, notes, preserve } = promptStore.getState().meta;
   try {
-    const record = await libraryStore.getState().create({ name, params });
+    const record = await libraryStore.getState().create({ name, params, tags, notes, preserve });
     editorStore.getState().markSaved(record);
     libraryStore.getState().setNaming(false);
   } catch {
@@ -66,15 +73,18 @@ export async function saveAsNew(name: string): Promise<void> {
 
 /** Saves over the current prompt, or asks for a name when that would overwrite a built-in. */
 export async function saveCurrent(): Promise<void> {
+  flushTyping();
   const { promptId, params } = editorStore.getState();
   const mine = libraryStore.getState().prompts.some((p) => p.id === promptId);
   if (!promptId || !mine) {
     libraryStore.getState().setNaming(true);
     return;
   }
+  const { tags, notes, preserve } = promptStore.getState().meta;
   try {
-    await libraryStore.getState().saveParams(promptId, params);
+    await libraryStore.getState().saveContent(promptId, { params, tags, notes, preserve });
     editorStore.getState().markSaved({ id: promptId, params });
+    markMetaSaved();
     showToast(t('library.saved'));
   } catch {
     reportStorageError();
@@ -83,17 +93,20 @@ export async function saveCurrent(): Promise<void> {
 
 export async function duplicatePrompt(view: PromptView): Promise<void> {
   const source = libraryStore.getState().prompts.find((p) => p.id === view.id);
+  const seed = BUILTIN_TEXT.get(view.name);
   const { name, params, tags } = view;
   try {
     const record = await libraryStore.getState().create({
       name,
       params,
       tags,
-      ...(source?.notes !== undefined && { notes: source.notes }),
-      ...(source?.preserve !== undefined && { preserve: source.preserve }),
       ...(source
-        ? source.freeText !== undefined && { freeText: source.freeText }
-        : { freeText: view.text }),
+        ? {
+            ...(source.notes !== undefined && { notes: source.notes }),
+            ...(source.preserve !== undefined && { preserve: source.preserve }),
+            ...(source.freeText !== undefined && { freeText: source.freeText }),
+          }
+        : { ...seed, freeText: view.text }),
     });
     editorStore.getState().selectPrompt(record);
   } catch {
@@ -135,15 +148,15 @@ export async function importLibrary(file: File): Promise<void> {
 }
 
 export function exportLibrary(): void {
-  const text = serializeLibrary(libraryStore.getState().prompts);
-  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `prompt-library-${new Date().toISOString().slice(0, 10)}.json`;
-  link.click();
-  URL.revokeObjectURL(url);
+  const date = new Date().toISOString().slice(0, 10);
+  downloadText(
+    `prompt-library-${date}.json`,
+    serializeLibrary(libraryStore.getState().prompts),
+    'application/json',
+  );
   saveSetting(db, 'lastBackupAt', Date.now()).catch(reportStorageError);
 }
 
-/** For the browser's leave-page warning. */
-export const shouldWarnBeforeLeaving = () => hasUnsavedChanges(editorStore.getState());
+/** True when the current work differs from what is saved. */
+export const hasUnsavedWork = (): boolean =>
+  hasUnsavedChanges(editorStore.getState()) || hasUnsavedMeta(promptStore.getState());

@@ -1,4 +1,4 @@
-import { migrateParams, SCHEMA_VERSION } from '@prompt-grader/engine';
+import { migrateParams, parseSGP, SCHEMA_VERSION, serializeSGP } from '@prompt-grader/engine';
 import { ulid } from 'ulid';
 import { z } from 'zod';
 import type { PromptRecord } from './db';
@@ -101,18 +101,25 @@ export function parseLibraryFile(
   for (const entry of prompts.slice(0, limits.maxItems)) {
     const item = normalize(entry, format === LEGACY_FORMAT);
     const trimmed = item?.name.trim().slice(0, MAX_NAME);
-    // Items with only prompt text need the SGP parser, which arrives in phase P5.
-    if (!item?.params || !trimmed) continue;
+    if (!item || !trimmed || (!item.params && !item.prompt)) continue;
 
     const name = uniqueName(trimmed, taken);
     taken.add(name);
+    const params = item.params ? migrateParams(item.params, from) : parseSGP(item.prompt!).params;
+    const tags = (item.tags ?? []).slice(0, MAX_TAGS);
     records.push({
       id: ulid(now),
       name,
-      prompt: item.prompt ?? '',
-      params: migrateParams(item.params, from),
+      prompt: serializeSGP({
+        name,
+        params,
+        tags,
+        ...(item.notes !== undefined && { notes: item.notes }),
+        ...(item.preserve !== undefined && { preserve: item.preserve }),
+      }),
+      params,
       schemaVersion: SCHEMA_VERSION,
-      tags: (item.tags ?? []).slice(0, MAX_TAGS),
+      tags,
       source: 'import',
       createdAt: now,
       updatedAt: now,

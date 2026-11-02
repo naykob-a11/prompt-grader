@@ -32,5 +32,7 @@ void main() {
   float dl = abs(dot(P - blur, vec3(0.2126, 0.7152, 0.0722)));
   float wn = u_denoise / 100.0 * 0.85 * (1.0 - sm(0.015, 0.07, dl));
   float ws = u_sharpen / 100.0 * 1.6 * sm(0.01, 0.045, dl);
-  outColor = vec4(P + (blur - P) * wn + (P - blur) * ws, center.a);
+  // Rounded here because hardware may round a value near .5 either way when writing RGBA8.
+  vec3 detailed = clamp(P + (blur - P) * wn + (P - blur) * ws, 0.0, 1.0);
+  outColor = vec4(floor(detailed * 255.0 + 0.5) / 255.0, center.a);
 }

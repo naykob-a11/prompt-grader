@@ -28,3 +28,4 @@
 - bundle ทุกอย่าง ไม่โหลดสคริปต์จาก CDN, ฟอนต์ self-host
 - CSP: `default-src 'self'; img-src 'self' blob: data:; connect-src 'self'; style-src 'self'; font-src 'self'; worker-src 'self' blob:`
 - `connect-src 'self'` ทำให้แม้มีโค้ดผิดพลาดก็ส่งข้อมูลออกนอก origin ไม่ได้ (e2e ตรวจซ้ำ)
+- `tests/e2e/csp.spec.ts` ใส่นโยบายนี้ให้ build จริงแล้วตรวจว่าไม่มีสิ่งใดถูกบล็อก ตัวแก้ไขพร้อมต์อยู่ใน Shadow DOM เพราะ CodeMirror จะใช้ constructed stylesheet แทนแท็ก `<style>` จึงไม่ต้องเพิ่ม `'unsafe-inline'`

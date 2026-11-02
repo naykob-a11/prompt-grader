@@ -1,20 +1,31 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { env } from './config/env';
 import { Controls } from './features/controls/Controls';
 import { LibraryPanel } from './features/library/LibraryPanel';
 import { Stage } from './features/stage/Stage';
 import { t, type MessageKey } from './i18n';
 import { openImageFile, openSampleImage } from './services/openImage';
-import { initLibrary, saveCurrent, shouldWarnBeforeLeaving } from './services/prompts';
+import { attachFiles, isPromptFile } from './services/promptFiles';
+import { hasUnsavedWork, initLibrary, saveCurrent } from './services/prompts';
 import { Toasts } from './shared/toast';
 import { useHotkeys, type HotkeyHandlers } from './shared/useHotkeys';
 import { editorStore, useEditor } from './store/editorStore';
 
-type Tab = 'library' | 'controls';
+const PromptPanel = lazy(() => import('./features/prompt-editor/PromptPanel'));
 
+type Side = 'controls' | 'prompt';
+type Tab = 'library' | Side;
+
+/** Phones show everything as tabs; wider screens keep the library in its own column. */
 const TABS: readonly { id: Tab; label: MessageKey }[] = [
   { id: 'library', label: 'tabs.library' },
   { id: 'controls', label: 'tabs.controls' },
+  { id: 'prompt', label: 'tabs.prompt' },
+];
+
+const SIDE_TABS: readonly { id: Side; label: MessageKey }[] = [
+  { id: 'prompt', label: 'tabs.prompt' },
+  { id: 'controls', label: 'tabs.sliders' },
 ];
 
 const SHORTCUTS: readonly { keys: string; label: MessageKey }[] = [
@@ -29,11 +40,21 @@ const SHORTCUTS: readonly { keys: string; label: MessageKey }[] = [
 // initLibrary subscribes for the page's lifetime, so it must run once despite StrictMode.
 let libraryStarted = false;
 
-const imageFrom = (list: FileList | null | undefined) =>
-  Array.from(list ?? []).find((file) => file.type.startsWith('image/')) ?? list?.[0];
+/** Text files become prompts; anything else is tried as an image. */
+function openFiles(list: FileList | null | undefined): void {
+  const files = Array.from(list ?? []);
+  const prompts = files.filter(isPromptFile);
+  if (prompts.length > 0) {
+    void attachFiles(prompts);
+    return;
+  }
+  const image = files.find((file) => file.type.startsWith('image/')) ?? files[0];
+  if (image) void openImageFile(image);
+}
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('library');
+  const [side, setSide] = useState<Side>('controls');
   const canUndo = useEditor((s) => s.past.length > 0);
   const canRedo = useEditor((s) => s.future.length > 0);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -47,19 +68,18 @@ export default function App() {
     }
 
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (shouldWarnBeforeLeaving()) event.preventDefault();
+      if (hasUnsavedWork()) event.preventDefault();
     };
     const onDragOver = (event: DragEvent) => event.preventDefault();
     const onDrop = (event: DragEvent) => {
       event.preventDefault();
-      const file = imageFrom(event.dataTransfer?.files);
-      if (file) void openImageFile(file);
+      openFiles(event.dataTransfer?.files);
     };
     const onPaste = (event: ClipboardEvent) => {
       const target = event.target;
       if (target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement) return;
-      const file = imageFrom(event.clipboardData?.files);
-      if (file) void openImageFile(file);
+      if (target instanceof HTMLElement && target.isContentEditable) return;
+      openFiles(event.clipboardData?.files);
     };
     window.addEventListener('beforeunload', onBeforeUnload);
     window.addEventListener('dragover', onDragOver);
@@ -142,7 +162,10 @@ export default function App() {
               type="button"
               role="tab"
               aria-selected={tab === item.id}
-              onClick={() => setTab(item.id)}
+              onClick={() => {
+                setTab(item.id);
+                if (item.id !== 'library') setSide(item.id);
+              }}
             >
               {t(item.label)}
             </button>
@@ -151,8 +174,30 @@ export default function App() {
         <section className="panel panel-library" data-active={tab === 'library'}>
           <LibraryPanel />
         </section>
-        <section className="panel panel-controls" data-active={tab === 'controls'}>
-          <Controls />
+        <section className="panel panel-controls" data-active={tab !== 'library'}>
+          <div className="side-tabs" role="tablist" aria-label={t('tabs.label')}>
+            {SIDE_TABS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={side === item.id}
+                onClick={() => {
+                  setSide(item.id);
+                  setTab(item.id);
+                }}
+              >
+                {t(item.label)}
+              </button>
+            ))}
+          </div>
+          {side === 'controls' ? (
+            <Controls />
+          ) : (
+            <Suspense fallback={null}>
+              <PromptPanel />
+            </Suspense>
+          )}
         </section>
       </main>
 

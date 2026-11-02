@@ -25,6 +25,7 @@ test('a saved prompt is still there after a reload, with its values', async ({ p
   await page.getByLabel('ความสว่าง (EV)').fill('42');
   await page.getByLabel('ความสว่าง (EV)').dispatchEvent('pointerup');
   await saveNew(page, 'เช้าวันใหม่');
+  await page.waitForTimeout(100); // lets the last-prompt setting reach IndexedDB
 
   await page.reload();
   await expect(promptButton(page, 'เช้าวันใหม่')).toBeVisible();

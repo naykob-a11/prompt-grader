@@ -65,8 +65,8 @@ interface PromptRecord {
 กติกานำเข้า:
 - ตรวจด้วย zod; รายการที่ผิดรูปแบบข้ามไปและนับรายงาน
 - **รองรับรูปแบบต้นแบบ** `{"format":"kreadsi-prompts","version":1,"prompts":[{name,text,params,note}]}` (`text` → `freeText`, `note` → `notes`)
-- มี `params` → ผ่าน `migrateParams()` แล้ว `clamp()`; ไม่มี `params` แต่มี `prompt` → `parseSGP(prompt)` (ทำใน P5 ก่อนหน้านั้นรายการแบบนี้ถูกนับเป็นรายการที่ข้าม)
-- `prompt` ถูกสร้างใหม่ด้วย `serializeSGP()` เสมอเพื่อให้ตรงกับ `params` (ทำใน P5 ก่อนหน้านั้นพร้อมต์ที่สร้างในแอปเก็บ `prompt` เป็นค่าว่าง)
+- มี `params` → ผ่าน `migrateParams()` แล้ว `clamp()`; ไม่มี `params` แต่มี `prompt` → `parseSGP(prompt)`
+- `prompt` ถูกสร้างใหม่ด้วย `serializeSGP()` เสมอเพื่อให้ตรงกับ `params` แถวเก่าที่ `prompt` ว่างได้ข้อความตอนโหลด
 - สร้าง id ใหม่เสมอ, `source: 'import'`; ชื่อซ้ำเติม " (2)"
 - จำกัด 5 MB ต่อไฟล์ (เกินแล้วปฏิเสธทั้งไฟล์) และ 1,000 รายการ (ส่วนเกินนับเป็นรายการที่ข้าม)
 

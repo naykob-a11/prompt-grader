@@ -16,7 +16,9 @@ function isTyping(target: EventTarget | null): boolean {
 export function useHotkeys(handlers: HotkeyHandlers): void {
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
-      if (!isTyping(event.target) && handlers.onKeyDown(event)) event.preventDefault();
+      // Ctrl+S saves from anywhere, including while typing in the prompt.
+      const save = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's';
+      if ((save || !isTyping(event.target)) && handlers.onKeyDown(event)) event.preventDefault();
     };
     const up = (event: KeyboardEvent) => handlers.onKeyUp?.(event);
     window.addEventListener('keydown', down);
