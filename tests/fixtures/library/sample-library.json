@@ -1,0 +1,21 @@
+{
+  "format": "prompt-grader/library",
+  "version": 1,
+  "exportedAt": "2026-11-02T07:00:00Z",
+  "schemaVersion": 3,
+  "prompts": [
+    {
+      "name": "เช้าสดใส",
+      "prompt": "# ชื่อ: เช้าสดใส\nความสว่าง: สว่างขึ้น เล็กน้อย (+20)\n",
+      "params": { "exposure": 20, "shadows": 30 },
+      "tags": ["ทดสอบ"]
+    },
+    {
+      "name": "เย็นทะเล",
+      "prompt": "",
+      "params": { "temp": -30, "saturation": 15 },
+      "notes": "ใช้กับภาพทะเล",
+      "tags": []
+    }
+  ]
+}

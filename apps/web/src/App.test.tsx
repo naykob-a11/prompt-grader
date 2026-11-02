@@ -1,3 +1,4 @@
+import 'fake-indexeddb/auto';
 import { BUILTIN_PRESETS } from '@prompt-grader/engine';
 import { render, screen } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
@@ -12,7 +13,7 @@ test('renders the title, every built-in preset and the slider groups', () => {
   render(<App />);
   expect(screen.getByRole('heading', { name: th['app.title'] })).toBeTruthy();
   for (const preset of BUILTIN_PRESETS) {
-    expect(screen.getByRole('button', { name: new RegExp(preset.name) })).toBeTruthy();
+    expect(screen.getByRole('button', { name: new RegExp(`^${preset.name}`) })).toBeTruthy();
   }
   expect(screen.getByLabelText('ความสว่าง (EV)')).toBeTruthy();
 });

@@ -1,0 +1,13 @@
+{
+  "format": "kreadsi-prompts",
+  "version": 1,
+  "prompts": [
+    {
+      "name": "ทุ่งนาเก่า",
+      "text": "warm film look",
+      "note": "จากต้นแบบ",
+      "params": { "fade": 40, "grain": 25, "temp": 15 }
+    },
+    { "text": "รายการนี้ไม่มีชื่อ จึงต้องถูกข้าม" }
+  ]
+}

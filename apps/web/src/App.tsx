@@ -5,6 +5,7 @@ import { LibraryPanel } from './features/library/LibraryPanel';
 import { Stage } from './features/stage/Stage';
 import { t, type MessageKey } from './i18n';
 import { openImageFile, openSampleImage } from './services/openImage';
+import { initLibrary, saveCurrent, shouldWarnBeforeLeaving } from './services/prompts';
 import { Toasts } from './shared/toast';
 import { useHotkeys, type HotkeyHandlers } from './shared/useHotkeys';
 import { editorStore, useEditor } from './store/editorStore';
@@ -22,7 +23,11 @@ const SHORTCUTS: readonly { keys: string; label: MessageKey }[] = [
   { keys: 'C', label: 'shortcuts.compare' },
   { keys: 'Ctrl+Z', label: 'shortcuts.undo' },
   { keys: 'Ctrl+Shift+Z', label: 'shortcuts.redo' },
+  { keys: 'Ctrl+S', label: 'shortcuts.save' },
 ];
+
+// initLibrary subscribes for the page's lifetime, so it must run once despite StrictMode.
+let libraryStarted = false;
 
 const imageFrom = (list: FileList | null | undefined) =>
   Array.from(list ?? []).find((file) => file.type.startsWith('image/')) ?? list?.[0];
@@ -36,7 +41,14 @@ export default function App() {
 
   useEffect(() => {
     if (env.VITE_SHOW_SAMPLE_IMAGE && !editorStore.getState().image) openSampleImage();
+    if (!libraryStarted) {
+      libraryStarted = true;
+      void initLibrary();
+    }
 
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (shouldWarnBeforeLeaving()) event.preventDefault();
+    };
     const onDragOver = (event: DragEvent) => event.preventDefault();
     const onDrop = (event: DragEvent) => {
       event.preventDefault();
@@ -49,10 +61,12 @@ export default function App() {
       const file = imageFrom(event.clipboardData?.files);
       if (file) void openImageFile(file);
     };
+    window.addEventListener('beforeunload', onBeforeUnload);
     window.addEventListener('dragover', onDragOver);
     window.addEventListener('drop', onDrop);
     window.addEventListener('paste', onPaste);
     return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
       window.removeEventListener('dragover', onDragOver);
       window.removeEventListener('drop', onDrop);
       window.removeEventListener('paste', onPaste);
@@ -64,9 +78,11 @@ export default function App() {
       onKeyDown(event) {
         const store = editorStore.getState();
         if (event.ctrlKey || event.metaKey) {
-          if (event.key.toLowerCase() !== 'z') return false;
-          if (event.shiftKey) store.redo();
-          else store.undo();
+          const key = event.key.toLowerCase();
+          if (key === 's') void saveCurrent();
+          else if (key === 'z' && event.shiftKey) store.redo();
+          else if (key === 'z') store.undo();
+          else return false;
           return true;
         }
         if (event.key === '\\') store.setPeeking(true);

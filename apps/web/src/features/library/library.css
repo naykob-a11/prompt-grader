@@ -1,7 +1,62 @@
 .library-title {
-  margin-bottom: var(--space-2);
+  margin-block: var(--space-3) var(--space-2);
   color: var(--muted);
   font-size: 14px;
+}
+
+.library-empty {
+  margin: 0 0 var(--space-2);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.library-search,
+.prompt-rename,
+.save-form input {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-block: var(--space-2);
+}
+
+.tag-list button {
+  padding: 0 var(--space-2);
+  font-size: 13px;
+}
+
+.save-bar,
+.save-form {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.save-form label {
+  font-size: 14px;
+}
+
+.save-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.save-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.save-actions button {
+  flex: 1 1 auto;
 }
 
 .prompt-list {
@@ -10,6 +65,11 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.prompt-row {
+  display: grid;
+  gap: 2px;
 }
 
 .prompt-item {
@@ -35,4 +95,36 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
+}
+
+.prompt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.prompt-actions button {
+  padding: 0 var(--space-2);
+  font-size: 13px;
+}
+
+.prompt-actions button.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.prompt-confirm {
+  flex: 1 1 100%;
+  font-size: 13px;
+}
+
+.import-export {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.import-export button {
+  flex: 1;
 }

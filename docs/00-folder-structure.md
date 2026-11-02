@@ -76,12 +76,12 @@ prompt-grader/
 │           ├── i18n/{th,en}.json
 │           ├── theme/tokens.css
 │           ├── store/{editorStore,libraryStore}.ts
-│           ├── storage/{db,libraryFile}.ts
-│           ├── services/{imageIO,promptFiles,clipboard}.ts
+│           ├── storage/{db,settings,libraryFile}.ts
+│           ├── services/{imageIO,openImage,sampleImage,prompts,promptFiles,clipboard}.ts
 │           ├── features/
 │           │   ├── stage/             Stage (canvas, ซูม/เลื่อน), CompareSlider, Histogram, useRenderer
 │           │   ├── controls/          Controls, ParamGroup, ParamSlider (รวมแถบสี kind: 'hue')
-│           │   ├── library/           LibraryPanel, PromptItem, ImportExport
+│           │   ├── library/           LibraryPanel, PromptItem, SaveBar, ImportExport
 │           │   ├── prompt-editor/     PromptEditor, WarningList, AttachButton, TemplateButton,
 │           │   │                      ChatBridgeDialog, NotesPanel
 │           │   └── export/            ExportDialog, Progress

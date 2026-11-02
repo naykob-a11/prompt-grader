@@ -5,7 +5,7 @@ const after = (page: Page) => page.getByTestId('stage-after');
 
 async function openFixture(page: Page) {
   await page.goto('/');
-  await page.locator('input[type=file]').setInputFiles(FIXTURE);
+  await page.locator('input[accept="image/*"]').setInputFiles(FIXTURE);
   await expect(page.getByTestId('stage-info')).toContainText('synthetic-ramps.png');
   await page.getByRole('button', { name: 'หลังปรับ' }).click();
 }
@@ -31,7 +31,7 @@ for (const { name, tabs, ...viewport } of viewports) {
       await openFixture(page);
       const initial = await shot(page);
 
-      await page.getByRole('button', { name: /หมอกเช้าบนดอย/ }).click();
+      await page.getByRole('button', { name: /^หมอกเช้าบนดอย/ }).click();
       const graded = await shot(page);
       expect(graded.equals(initial)).toBe(false);
 
@@ -95,8 +95,8 @@ test('the compare divider moves with the keyboard', async ({ page }) => {
 
 test('Ctrl+Z and Ctrl+Shift+Z undo and redo', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /หมอกเช้าบนดอย/ }).click();
-  const mist = page.getByRole('button', { name: /หมอกเช้าบนดอย/ });
+  await page.getByRole('button', { name: /^หมอกเช้าบนดอย/ }).click();
+  const mist = page.getByRole('button', { name: /^หมอกเช้าบนดอย/ });
   await expect(mist).toHaveAttribute('aria-pressed', 'true');
   await page.keyboard.press('Control+z');
   await expect(mist).toHaveAttribute('aria-pressed', 'false');
@@ -130,7 +130,7 @@ test('a dropped or pasted image opens, and a non-image file gives a helpful mess
   );
   await expect(page.getByTestId('stage-info')).toContainText('pasted.png');
 
-  await page.locator('input[type=file]').setInputFiles({
+  await page.locator('input[accept="image/*"]').setInputFiles({
     name: 'notes.txt',
     mimeType: 'text/plain',
     buffer: Buffer.from('not a picture'),
@@ -140,7 +140,7 @@ test('a dropped or pasted image opens, and a non-image file gives a helpful mess
 
 test('double-clicking a slider label resets it', async ({ page }) => {
   await page.goto('/');
-  const slider = page.getByLabel('คอนทราสต์');
+  const slider = page.getByRole('slider', { name: 'คอนทราสต์' });
   await expect(slider).toHaveValue('5');
   await page.getByText('คอนทราสต์', { exact: true }).dblclick();
   await expect(slider).toHaveValue('0');

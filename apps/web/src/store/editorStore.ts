@@ -23,9 +23,17 @@ export interface OpenImage {
   isSample: boolean;
 }
 
+/** A library entry as the editor needs it. */
+export interface PromptRef {
+  id: string;
+  params: Params;
+}
+
 interface Snapshot {
   params: Params;
-  presetId: string | null;
+  promptId: string | null;
+  /** The parameters saved in the current prompt, which unsaved changes are measured from. */
+  baseline: Params | null;
 }
 
 export interface EditorState extends Snapshot {
@@ -39,7 +47,13 @@ export interface EditorState extends Snapshot {
   peeking: boolean;
 
   setImage(image: OpenImage): void;
-  selectPreset(id: string): void;
+  selectPrompt(prompt: PromptRef): void;
+  /** Selects a prompt without an undo step, for restoring the last session. */
+  restorePrompt(prompt: PromptRef): void;
+  /** Records that the current parameters are now saved in this prompt. */
+  markSaved(prompt: PromptRef): void;
+  /** Detaches the editor from a deleted prompt, keeping the current parameters. */
+  forgetPrompt(id: string): void;
   setParam(key: ParamKey, value: number): void;
   commitEdit(): void;
   resetParam(key: ParamKey): void;
@@ -54,6 +68,10 @@ export interface EditorState extends Snapshot {
 const sameParams = (a: Params, b: Params) =>
   (Object.keys(a) as ParamKey[]).every((key) => a[key] === b[key]);
 
+/** True when the sliders differ from what is saved in the current prompt. */
+export const hasUnsavedChanges = (s: Pick<EditorState, 'params' | 'baseline'>) =>
+  !sameParams(s.params, s.baseline ?? DEFAULT_PARAMS);
+
 export interface EditorOptions {
   undoLimit: number;
   presetId: string;
@@ -63,20 +81,24 @@ export interface EditorOptions {
 export function createEditorStore({ undoLimit, presetId, compareMode }: EditorOptions) {
   const preset = BUILTIN_PRESETS.find((p) => p.id === presetId);
   return createStore<EditorState>()((set, get) => {
-    const snapshot = (): Snapshot => ({ params: get().params, presetId: get().presetId });
+    const snapshot = (): Snapshot => {
+      const { params, promptId, baseline } = get();
+      return { params, promptId, baseline };
+    };
     const remember = (past: Snapshot[], entry: Snapshot) => [...past, entry].slice(-undoLimit);
 
     /** Applies a change as one undo step, unless it changes nothing. */
     const applyStep = (next: Snapshot) => {
-      const { params, presetId: current, past } = get();
-      if (sameParams(params, next.params) && current === next.presetId) return;
+      const { params, promptId, past } = get();
+      if (sameParams(params, next.params) && promptId === next.promptId) return;
       set({ ...next, past: remember(past, snapshot()), future: [], editBase: null });
     };
 
     return {
       image: null,
       params: preset?.params ?? DEFAULT_PARAMS,
-      presetId: preset?.id ?? null,
+      promptId: preset?.id ?? null,
+      baseline: preset?.params ?? null,
       past: [],
       future: [],
       editBase: null,
@@ -85,16 +107,20 @@ export function createEditorStore({ undoLimit, presetId, compareMode }: EditorOp
 
       setImage: (image) => set({ image, past: [], future: [], editBase: null }),
 
-      selectPreset: (id) => {
-        const next = BUILTIN_PRESETS.find((p) => p.id === id);
-        if (next) applyStep({ params: next.params, presetId: next.id });
+      selectPrompt: ({ id, params }) => applyStep({ params, promptId: id, baseline: params }),
+
+      restorePrompt: ({ id, params }) => set({ params, promptId: id, baseline: params }),
+
+      markSaved: ({ id, params }) => set({ promptId: id, baseline: params }),
+
+      forgetPrompt: (id) => {
+        if (get().promptId === id) set({ promptId: null, baseline: null });
       },
 
       setParam: (key, value) =>
         set((s) => ({
           params: { ...s.params, [key]: value },
-          presetId: null,
-          editBase: s.editBase ?? { params: s.params, presetId: s.presetId },
+          editBase: s.editBase ?? snapshot(),
         })),
 
       commitEdit: () => {
@@ -108,11 +134,11 @@ export function createEditorStore({ undoLimit, presetId, compareMode }: EditorOp
       },
 
       resetParam: (key) => {
-        const { params } = get();
-        applyStep({ params: { ...params, [key]: DEFAULT_PARAMS[key] }, presetId: null });
+        const { params, promptId, baseline } = get();
+        applyStep({ params: { ...params, [key]: DEFAULT_PARAMS[key] }, promptId, baseline });
       },
 
-      resetAll: () => applyStep({ params: DEFAULT_PARAMS, presetId: null }),
+      resetAll: () => applyStep({ params: DEFAULT_PARAMS, promptId: null, baseline: null }),
 
       undo: () => {
         get().commitEdit();
