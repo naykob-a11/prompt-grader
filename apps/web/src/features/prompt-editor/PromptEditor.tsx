@@ -27,7 +27,7 @@ function showWarnings(view: EditorView): void {
 }
 
 const theme = EditorView.theme({
-  '&': { height: '100%', backgroundColor: 'var(--bg)', color: 'var(--fg)' },
+  '&': { height: '100%', backgroundColor: 'var(--panel)', color: 'var(--fg)' },
   '.cm-scroller': { fontFamily: 'var(--font-body)', lineHeight: '1.6' },
   '.cm-gutters': { backgroundColor: 'var(--panel)', color: 'var(--muted)', border: 'none' },
   '.cm-content': { caretColor: 'var(--fg)' },
@@ -52,7 +52,7 @@ export function PromptEditor() {
           history(),
           lineNumbers(),
           EditorView.lineWrapping,
-          EditorView.contentAttributes.of({ 'aria-label': t('editor.label') }),
+          EditorView.contentAttributes.of({ 'aria-label': t('editor.label'), tabindex: '0' }),
           placeholder(t('editor.placeholder')),
           sgpLanguage,
           syntaxHighlighting(sgpHighlight),

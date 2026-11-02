@@ -87,14 +87,14 @@ test('search and tags narrow the list', async ({ page }) => {
 
 test('unsaved changes are flagged, and Ctrl+S saves over the current prompt', async ({ page }) => {
   await ready(page);
-  await expect(page.getByText('มีค่าที่ยังไม่บันทึก')).toHaveCount(0);
+  await expect(page.locator('.save-status')).toHaveCount(0);
   await saveNew(page, 'ของฉัน');
 
   await page.getByRole('slider', { name: 'คอนทราสต์' }).fill('33');
-  await expect(page.getByText('มีค่าที่ยังไม่บันทึก')).toBeVisible();
+  await expect(page.locator('.save-status')).toBeVisible();
   await page.keyboard.press('Control+s');
   await expect(page.getByText('บันทึกพร้อมต์แล้ว')).toBeVisible();
-  await expect(page.getByText('มีค่าที่ยังไม่บันทึก')).toHaveCount(0);
+  await expect(page.locator('.save-status')).toHaveCount(0);
 
   await page.reload();
   await expect(page.getByRole('slider', { name: 'คอนทราสต์' })).toHaveValue('33');

@@ -94,7 +94,7 @@ prompt-grader/
 │   ├── golden/                        ภาพอ้างอิง (สร้างด้วย golden:update)
 │   └── e2e/                           Playwright: *.spec.ts + harness/ (หน้าทดสอบเครื่องยนต์ในเบราว์เซอร์ ไม่ถูก deploy)
 │
-├── scripts/                           🔨 make-synthetic-fixture.ts, golden.ts
+├── scripts/                           🔨 make-synthetic-fixture.ts, golden.ts, make-icons.ts
 └── .github/workflows/ci.yml           🔨
 ```
 

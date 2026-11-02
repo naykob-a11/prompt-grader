@@ -13,6 +13,7 @@ import App from './App';
 import { env } from './config/env';
 
 document.title = env.VITE_APP_NAME;
+document.documentElement.lang = env.VITE_DEFAULT_LOCALE;
 if (env.VITE_DEFAULT_THEME !== 'system') {
   document.documentElement.dataset.theme = env.VITE_DEFAULT_THEME;
 }

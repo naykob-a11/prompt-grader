@@ -124,6 +124,16 @@ button[aria-selected='true'] {
   flex: 1;
 }
 
+.tab-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-inline-start: var(--space-1);
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: middle;
+}
+
 .side-tabs {
   display: flex;
   gap: var(--space-2);

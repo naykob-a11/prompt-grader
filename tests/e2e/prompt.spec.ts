@@ -215,11 +215,11 @@ test('saving keeps notes and tags typed in the prompt, and text survives', async
   await ready(page);
   await setText(page, '# ชื่อ: แชร์ได้\n# แท็ก: พิเศษ\nเงา: ยก (+15)\n[หมายเหตุ]\nจำไว้');
   await page.keyboard.press('Control+Enter');
-  await expect(page.getByText('มีค่าที่ยังไม่บันทึก')).toBeVisible();
+  await expect(page.locator('.save-status')).toBeVisible();
   await page.keyboard.press('Control+s');
   await expect(page.getByLabel('ชื่อพร้อมต์')).toHaveValue('แชร์ได้');
   await page.getByRole('button', { name: 'บันทึกเป็นพร้อมต์ใหม่' }).click();
-  await expect(page.getByText('มีค่าที่ยังไม่บันทึก')).toHaveCount(0);
+  await expect(page.locator('.save-status')).toHaveCount(0);
   await page.waitForTimeout(100); // lets the last-prompt setting reach IndexedDB
 
   await page.reload();
@@ -234,7 +234,7 @@ test('a note edit alone counts as unsaved', async ({ page }) => {
   await ready(page);
   await setText(page, '[หมายเหตุ]\nโน้ตใหม่');
   await page.keyboard.press('Control+Enter');
-  await expect(page.getByText('มีค่าที่ยังไม่บันทึก')).toBeVisible();
+  await expect(page.locator('.save-status')).toBeVisible();
 });
 
 test('the prompt exports as a file that reads back', async ({ page }) => {

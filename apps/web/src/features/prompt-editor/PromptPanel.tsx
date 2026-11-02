@@ -25,6 +25,7 @@ export default function PromptPanel() {
 
   return (
     <div className="prompt-panel">
+      <h2 className="visually-hidden">{t('editor.label')}</h2>
       <div className="prompt-toolbar">
         <button type="button" onClick={() => fileInput.current?.click()}>
           {t('editor.attach')}

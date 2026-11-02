@@ -10,7 +10,7 @@ import { attachFiles, isPromptFile } from './services/promptFiles';
 import { hasUnsavedWork, initLibrary, saveCurrent } from './services/prompts';
 import { Toasts } from './shared/toast';
 import { useHotkeys, type HotkeyHandlers } from './shared/useHotkeys';
-import { editorStore, useEditor } from './store/editorStore';
+import { editorStore, hasUnsavedChanges, useEditor } from './store/editorStore';
 
 const PromptPanel = lazy(() => import('./features/prompt-editor/PromptPanel'));
 
@@ -63,6 +63,7 @@ export default function App() {
   const shortcuts = useRef<HTMLDialogElement>(null);
   const exportDialog = useRef<HTMLDialogElement>(null);
   const hasImage = useEditor((s) => s.image !== null);
+  const unsaved = useEditor(hasUnsavedChanges);
 
   useEffect(() => {
     if (env.VITE_SHOW_SAMPLE_IMAGE && !editorStore.getState().image) openSampleImage();
@@ -180,6 +181,11 @@ export default function App() {
               }}
             >
               {t(item.label)}
+              {item.id === 'library' && unsaved && (
+                <span className="tab-dot">
+                  <span className="visually-hidden">{t('library.unsaved')}</span>
+                </span>
+              )}
             </button>
           ))}
         </div>

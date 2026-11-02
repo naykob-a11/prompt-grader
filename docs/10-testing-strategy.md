@@ -11,6 +11,9 @@
 | GPU parity | Playwright (Chromium, `--use-angle=swiftshader`) | I5 (พรีเซ็ต, ค่าสุดขั้ว, ค่าสุ่ม), ไทล์, ทิศภาพบน canvas, CPU fallback, context lost | ทุก PR |
 | GPU จริง | Playwright, `E2E_SWIFTSHADER=false pnpm test:e2e -- parity benchmark` | I5 บนฮาร์ดแวร์จริง และ NFR-01 พรีวิว 2048 px ≥ 30 fps (บน swiftshader แค่รายงานตัวเลข) CI ไม่มี GPU จึงต้องรันบนเครื่องจริง เคยจับบั๊กการปัดเศษที่ swiftshader ไม่แสดง | ก่อน release |
 | Component | Vitest + Testing Library | ParamSlider, PromptItem, ImportExport, PromptEditor (คำเตือน, ซิงก์กับแถบเลื่อน), ChatBridgeDialog | ทุก commit |
+| ออฟไลน์ | Playwright (`offline.spec.ts`) | ปิดเครือข่ายแล้วเปิดภาพ ปรับ ใช้พร้อมต์ บันทึก ส่งออก ครบทุกขั้น และตรวจ manifest | ทุก PR |
+| การเข้าถึง | Playwright + axe-core (`a11y.spec.ts`) | WCAG 2.1 AA ทุกแผงและหน้าต่าง ทั้งสองธีมที่ 360/1440 px, ลำดับคีย์บอร์ด, focus | ทุก PR |
+| Lighthouse | `lighthouse --port` ต่อกับ browser ของ Playwright บน `pnpm preview` | accessibility ≥ 95 (ล่าสุด 100 ทั้งมือถือและ desktop) | ก่อน release |
 | E2E | Playwright | เปิดภาพ → เลือกพรีเซ็ต → ปรับ → บันทึกพร้อมต์ → ส่งออก; แนบ `.sgp.txt` → พรีวิวเปลี่ยน; วางคำตอบจากแชต (มีรั้วโค้ด); มือถือ 360 px; ตรวจว่าไม่มี request ออกนอก origin | ทุก PR |
 
 ## 2. ภาพทดสอบ (`tests/fixtures/images/`)
