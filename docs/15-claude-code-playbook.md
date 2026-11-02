@@ -52,7 +52,6 @@
 - fallback ไป CPU worker เมื่อไม่มี WebGL2 หรือ context lost
 - parity test ด้วย Playwright (Chromium swiftshader): max diff ≤ 2/255 เมื่อ grain=0 ทุกพรีเซ็ตในตัว
 - benchmark พรีวิว 2048 px
-- ตรวจ EXT_color_buffer_float ก่อนใช้ FBO RGBA16F ถ้าไม่มีให้ fallback ไป CPU worker
 เกณฑ์ผ่าน: parity ผ่าน และพรีวิว ≥ 30 fps บนเครื่องพัฒนา
 ```
 

@@ -59,7 +59,8 @@ prompt-grader/
 │       │   ├── sgp/{vocabulary,parse,serialize,suggest,template}.ts
 │       │   ├── math.ts                smoothstep, hueOffset, hash2
 │       │   ├── stats/{grayWorld,histogram,imageStats}.ts
-│       │   ├── cpu/{grade,detail,worker}.ts
+│       │   ├── types.ts, createRenderer.ts
+│       │   ├── cpu/{grade,detail,worker,cpuRenderer}.ts
 │       │   └── gl/{renderer,uniforms,tiles}.ts + shaders/{fullscreen.vert,detail.frag,grade.frag}
 │       └── test/{identity,extremes,tiling,bw,schema,migrate,prototype,golden,sgp}.test.ts, test/support/, scripts/{exportSchema,renderPreset}.ts
 │
@@ -92,7 +93,7 @@ prompt-grader/
 │   ├── fixtures/library/              ไฟล์คลังตัวอย่างสำหรับทดสอบนำเข้า
 │   ├── fixtures/sgp/                  พร้อมต์ที่ผู้ใช้รายงานว่าอ่านผิด + ค่าที่คาดหวัง
 │   ├── golden/                        ภาพอ้างอิง (สร้างด้วย golden:update)
-│   └── e2e/*.spec.ts                  Playwright
+│   └── e2e/                           Playwright: *.spec.ts + harness/ (หน้าทดสอบเครื่องยนต์ในเบราว์เซอร์ ไม่ถูก deploy)
 │
 ├── scripts/                           🔨 make-synthetic-fixture.ts, golden.ts
 └── .github/workflows/ci.yml           🔨

@@ -22,7 +22,7 @@ If the spec and the prototype disagree, stop and report the difference to the us
 2. **CPU.** Implement in `src/cpu/grade.ts` (or `detail.ts`, `stats/*`). Keep the hot loop allocation-free: no objects, arrays or closures per pixel; hoist parameter normalization (`p.x/100`) outside the loop.
 3. **GPU.** Mirror the change in `src/gl/shaders/grade.frag` (or `detail.frag`). Uniforms come from `src/gl/uniforms.ts`, which is generated from the schema — never hand-add a uniform name.
 4. **Invariants.** The neutral value of any new control must make the stage a no-op (I1). Run `pnpm --filter engine test`.
-5. **Parity.** Run `pnpm test:e2e -- parity`. Max abs diff must be ≤ 2/255 with grain = 0. See `parity-checklist.md` when it fails.
+5. **Parity.** Run `pnpm test:e2e -- parity`. Max abs diff must be ≤ 2/255 for built-in presets and ≤ 3/255 for stress cases (spec §3 explains why). See `parity-checklist.md` when it fails.
 6. **Golden.** If output changes intentionally: `pnpm golden:update` then `pnpm golden:diff`, and show the diff images to the user before committing. Never update goldens to make a failing test pass without that review.
 7. **Version.** If the meaning of an existing parameter value changed, bump `SCHEMA_VERSION` and add a case to `migrate.ts` + `migrate.test.ts` so saved presets keep their look.
 
@@ -39,4 +39,4 @@ detail(3×3) → exposure/WB/castFix → dehaze → HSV (bands, foliage, sat, vi
 - Work in float 0..1 sRGB (no linearization — matches the prototype).
 - Luminance weights 0.2126/0.7152/0.0722 everywhere.
 - Final write: CPU uses `Uint8ClampedArray` rounding; GPU writes to RGBA8 — do not add dithering.
-- GPU grain uses a float hash; it is checked statistically, not per-pixel.
+- GPU grain uses the same integer hash as the CPU, on GLSL `uint`, so it matches per pixel.

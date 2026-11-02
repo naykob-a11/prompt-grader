@@ -14,7 +14,7 @@ apps/web          ← import @prompt-grader/engine
 กฎ dependency (ตรวจด้วย `no-restricted-imports` ของ ESLint ใน `eslint.config.mjs`):
 - `engine/schema` ← ใช้ได้ทุกที่
 - `engine/cpu`, `engine/stats` ← ห้าม import `gl/`
-- `engine/gl` ← import `schema` ได้
+- `engine/gl` ← import `schema` ได้ ห้าม import `cpu/` (ใช้ร่วมกันผ่าน `types.ts`; `createRenderer.ts` เป็นจุดเดียวที่รู้จักทั้งสอง backend)
 - `engine/sgp` ← import ได้เฉพาะ `schema` (ห้ามแตะ DOM, cpu, gl)
 - `apps/web/features/*` ← ห้าม import ข้าม feature โดยตรง ให้ผ่าน `store/` หรือ `shared/`
 
@@ -40,9 +40,12 @@ src/
     grade.ts           gradePixels(orig, src, dst, w, rows, y0, params, ctx)
                        (orig = ก่อน detail ใช้กับ mix, src = หลัง detail, ขนาดภาพเต็มอยู่ใน ctx)
                        gradeImage(src, w, h, params, ctx, stripRows) รวม detail + grade ทีละแถบ
-    worker.ts          Worker entry: รับ ImageData strip → คืนผล
+    worker.ts          Worker entry: เก็บภาพไว้ แล้วเกรดทุกครั้งที่ได้ params ใหม่
+    cpuRenderer.ts     Renderer สำรอง: ส่งงานให้ worker แล้ววาดด้วย putImageData
+  createRenderer.ts    เลือก backend (import ผ่าน @prompt-grader/engine/renderer)
+  types.ts             GradeContext, RawImage, Renderer
   gl/
-    renderer.ts        class GradeRenderer { setImage(), setParams(), render(), exportTiles() }
+    renderer.ts        class GradeRenderer { setImage(), setParams(), render(), readPixels(), renderTiles() }
     shaders/
       fullscreen.vert
       detail.frag      pass 1
@@ -65,23 +68,25 @@ interface GradeContext {                           // ค่าที่คำ�
   wbGains: [number, number, number];               // จาก grayWorld (ใช้กับ castFix)
   fullWidth: number; fullHeight: number;           // ใช้กับ haze/vignette ตามตำแหน่งจริง
 }
+interface RawImage { data: Uint8ClampedArray; width: number; height: number }  // RGBA, แถวบนก่อน
 interface Renderer {
-  setImage(bitmap: ImageBitmap, ctx: GradeContext): void;
+  readonly backend: 'webgl2' | 'cpu';
+  setImage(image: RawImage, ctx: GradeContext): void;   // ผู้เรียกย่อภาพพรีวิวมาก่อน
   setParams(p: Params): void;                      // re-render แบบ rAF throttle
-  readPreview(): ImageBitmap;
-  exportFull(opts: {type: 'image/jpeg'|'image/png'|'image/webp'; quality?: number;
-                    onProgress?: (0..1) => void; signal?: AbortSignal}): Promise<Blob>;
+  render(): Promise<void>;                         // เสร็จเมื่อค่าปัจจุบันอยู่บน canvas แล้ว
+  dispose(): void;
 }
 ```
 
 ### 2.2 กลยุทธ์ GPU
 
-- Texture ต้นฉบับ: RGBA8 sRGB → คำนวณใน float32 ใน shader
-- Pass 1 `detail.frag` → FBO RGBA16F (ข้ามเมื่อ sharpen = denoise = 0)
+- Texture ต้นฉบับ: RGBA8 ค่าดิบ ไม่แปลง sRGB → คำนวณใน float32 ใน shader
+- Pass 1 `detail.frag` → FBO RGBA8 (ข้ามเมื่อ sharpen = denoise = 0) ตั้งใจให้เป็น 8 บิตเหมือนฝั่ง CPU จึงไม่ต้องใช้ `EXT_color_buffer_float`
 - Pass 2 `grade.frag` → canvas หรือ FBO สำหรับไทล์ (อ่านผล pass 1 และ texture ต้นฉบับสำหรับขั้น mix)
-- พรีวิว: ย่อภาพเป็น ≤ 2048 px ตอน `setImage`
-- ส่งออก: ไทล์ขนาด min(MAX_TEXTURE_SIZE, 4096) ขอบซ้อน 2 px, `readPixels` ทีละไทล์ลง `OffscreenCanvas` ขนาดจริง
-- ตรวจ `WEBGL_lose_context` / context lost → สลับไป CPU worker
+- พรีวิว: ผู้เรียกย่อภาพเป็น ≤ 2048 px ก่อนส่งเข้า `setImage` เพราะต้องใช้พิกเซลชุดนี้คำนวณ gray-world อยู่แล้ว
+- ส่งออก: `renderTiles()` ไทล์ขนาด min(MAX_TEXTURE_SIZE, 4096) ขอบซ้อน 2 px, `readPixels` ทีละไทล์ส่งให้ callback
+- ไม่มี WebGL2 → `createRenderer` คืน CPU renderer
+- context lost → เรียก `onContextLost` ผู้เรียกต้องสร้าง canvas ใหม่ แล้วเรียก `createRenderer` ด้วย `forceCpu` เพราะ canvas ที่เคยมี WebGL context ใช้ 2D ไม่ได้
 
 ## 3. apps/web
 

@@ -8,7 +8,8 @@
 | SGP | Vitest | ทุกเคสจาก `reference/sgp-reference.test.mjs`, round-trip ทุกพรีเซ็ต, ไฟล์ใน `seed/structured-prompts/`, fuzz (ข้อความสุ่ม/ไบนารี ต้องไม่ throw และค่าอยู่ในช่วงเสมอ), benchmark 2,000 บรรทัด < 20 ms | ทุก commit |
 | Engine invariants | Vitest | I1–I4, I7 จาก `04-grading-engine-spec.md` บนภาพสังเคราะห์ | ทุก commit |
 | Golden images | Vitest + `pngjs` | พรีเซ็ตในตัว × ภาพทดสอบ → เทียบ PSNR ≥ 45 dB | ทุก commit |
-| GPU parity | Playwright (Chromium, `--use-angle=swiftshader`) | I5: GPU vs CPU ≤ 2/255 | ทุก PR |
+| GPU parity | Playwright (Chromium, `--use-angle=swiftshader`) | I5 (พรีเซ็ต, ค่าสุดขั้ว, ค่าสุ่ม), ไทล์, ทิศภาพบน canvas, CPU fallback, context lost | ทุก PR |
+| Benchmark | Playwright, `E2E_SWIFTSHADER=false pnpm test:e2e -- benchmark` | NFR-01 พรีวิว 2048 px ≥ 30 fps (บน swiftshader แค่รายงานตัวเลข) | ก่อน release |
 | Component | Vitest + Testing Library | ParamSlider, PromptItem, ImportExport, PromptEditor (คำเตือน, ซิงก์กับแถบเลื่อน), ChatBridgeDialog | ทุก commit |
 | E2E | Playwright | เปิดภาพ → เลือกพรีเซ็ต → ปรับ → บันทึกพร้อมต์ → ส่งออก; แนบ `.sgp.txt` → พรีวิวเปลี่ยน; วางคำตอบจากแชต (มีรั้วโค้ด); มือถือ 360 px; ตรวจว่าไม่มี request ออกนอก origin | ทุก PR |
 

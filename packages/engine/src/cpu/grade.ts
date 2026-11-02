@@ -1,13 +1,7 @@
 import { hash2, hueOffset, luminance, smoothstep } from '../math';
 import type { Params } from '../schema';
+import type { GradeContext } from '../types';
 import { detail } from './detail';
-
-/** Per-image values, computed once and shared by every strip or tile. */
-export interface GradeContext {
-  wbGains: readonly [number, number, number];
-  fullWidth: number;
-  fullHeight: number;
-}
 
 const BAND_CENTERS = [0, 50, 115, 180, 225, 285];
 const BAND_IDS = ['R', 'Y', 'G', 'A', 'B', 'P'] as const;
