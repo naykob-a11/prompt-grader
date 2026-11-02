@@ -1,0 +1,112 @@
+.group {
+  border-bottom: 1px solid var(--line);
+  padding-block: var(--space-2);
+}
+
+.group summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block: var(--space-1);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.group-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.param {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0 var(--space-2);
+  padding-block: var(--space-1);
+}
+
+.param label {
+  min-width: 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  cursor: default;
+  user-select: none;
+}
+
+.param-value {
+  grid-column: 3;
+  min-width: 44px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.param-swatch {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+
+.param-track {
+  position: relative;
+  grid-column: 1 / -1;
+}
+
+/* A mark at the neutral value, drawn under the slider. */
+.param-track::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: var(--neutral);
+  width: 2px;
+  background: var(--muted);
+  opacity: 0.6;
+}
+
+.param input[type='range'] {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.param[data-kind='hue'] input[type='range'] {
+  height: 12px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    to right,
+    hsl(0 80% 50%),
+    hsl(60 80% 50%),
+    hsl(120 80% 50%),
+    hsl(180 80% 50%),
+    hsl(240 80% 50%),
+    hsl(300 80% 50%),
+    hsl(360 80% 50%)
+  );
+  appearance: none;
+}
+
+.param[data-kind='hue'] input[type='range']::-webkit-slider-thumb {
+  width: 14px;
+  height: 18px;
+  border: 2px solid var(--panel);
+  border-radius: 4px;
+  background: var(--accent);
+  appearance: none;
+}
+
+.param[data-kind='hue'] input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 18px;
+  border: 2px solid var(--panel);
+  border-radius: 4px;
+  background: var(--accent);
+}

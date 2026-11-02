@@ -69,7 +69,6 @@ prompt-grader/
 │       ├── index.html
 │       ├── vite.config.ts             PWA plugin, base path
 │       ├── public/_headers            CSP สำหรับ Cloudflare Pages
-│       ├── public/fonts/              ฟอนต์ self-host
 │       └── src/
 │           ├── main.tsx, App.tsx
 │           ├── config/env.ts          ที่เดียวที่ใช้ import.meta.env
@@ -80,8 +79,8 @@ prompt-grader/
 │           ├── storage/{db,libraryFile}.ts
 │           ├── services/{imageIO,promptFiles,clipboard}.ts
 │           ├── features/
-│           │   ├── stage/             Canvas, CompareSlider, ZoomPan, Histogram
-│           │   ├── controls/          ParamGroup, ParamSlider, HueSlider
+│           │   ├── stage/             Stage (canvas, ซูม/เลื่อน), CompareSlider, Histogram, useRenderer
+│           │   ├── controls/          Controls, ParamGroup, ParamSlider (รวมแถบสี kind: 'hue')
 │           │   ├── library/           LibraryPanel, PromptItem, ImportExport
 │           │   ├── prompt-editor/     PromptEditor, WarningList, AttachButton, TemplateButton,
 │           │   │                      ChatBridgeDialog, NotesPanel

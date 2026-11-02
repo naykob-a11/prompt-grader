@@ -16,7 +16,7 @@ Spec: `docs/08-ui-ux-spec.md`. Tokens: `apps/web/src/theme/tokens.css`.
 
 ## Visual system
 - Colors only through tokens; both themes defined at the token level (`:root`, `prefers-color-scheme: dark`, `[data-theme]`). No literal colors in components.
-- Fonts: Anuphan (headings), IBM Plex Sans Thai (body), IBM Plex Mono (numbers), self-hosted in `public/fonts`.
+- Fonts: Anuphan (headings), IBM Plex Sans Thai (body), IBM Plex Mono (numbers), self-hosted through `@fontsource` packages imported in `main.tsx`, which Vite bundles into the site.
 - The image stage stays neutral grey — never tint or put accent color around the photo; it biases color judgment.
 - Accent teal only for primary actions, selection and slider thumbs.
 

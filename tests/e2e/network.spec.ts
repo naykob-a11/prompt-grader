@@ -1,4 +1,14 @@
+import { readdirSync, readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
+
+test('the build ships production React', () => {
+  const assets = 'apps/web/dist/assets';
+  const scripts = readdirSync(assets).filter((file) => file.endsWith('.js'));
+  expect(scripts.length).toBeGreaterThan(0);
+  for (const file of scripts) {
+    expect(readFileSync(`${assets}/${file}`, 'utf8'), file).not.toContain('reactjs.org/link/');
+  }
+});
 
 test('the app opens without any request leaving the origin', async ({ page, baseURL }) => {
   const origin = new URL(baseURL!).origin;

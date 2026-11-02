@@ -6,7 +6,10 @@ import { parseEnv } from './src/config/envSchema.ts';
 
 const envDir = fileURLToPath(new URL('../..', import.meta.url));
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
+  // A NODE_ENV left over in the shell must not ship the development build of React.
+  if (command === 'build') process.env.NODE_ENV = 'production';
+
   // Parsing here makes a bad VITE_* value fail `pnpm build`, not just the running app.
   const env = parseEnv(loadEnv(mode, envDir, 'VITE_'));
   const tools = loadEnv(mode, envDir, '');

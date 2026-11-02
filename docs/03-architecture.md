@@ -106,8 +106,8 @@ src/
     promptFiles.ts                ← อ่าน/เขียน .sgp.txt, ตรวจ UTF-8 และขนาด
     clipboard.ts                  ← คัดลอกคำสั่งสำหรับแชต, คัดลอกพร้อมต์
   features/
-    stage/  (Canvas, CompareSlider, ZoomPan, Histogram)
-    controls/ (ParamGroup, ParamSlider, HueSlider — สร้างจาก schema)
+    stage/  (Stage, CompareSlider, Histogram, useRenderer)
+    controls/ (Controls, ParamGroup, ParamSlider — สร้างจาก schema, แถบสีใช้ kind: 'hue')
     library/ (LibraryPanel, PromptItem, ImportExport)
     prompt-editor/ (PromptEditor: CodeMirror 6 + ไฮไลต์ไวยากรณ์ SGP + คำเตือนรายบรรทัด,
                     AttachButton, TemplateButton, ChatBridgeDialog, NotesPanel)
