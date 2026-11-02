@@ -68,7 +68,8 @@ prompt-grader/
 │   └── web/                           🔨 Vite + React 18 + TypeScript (static, ไม่มี backend)
 │       ├── index.html
 │       ├── vite.config.ts             PWA plugin, base path
-│       ├── public/_headers            CSP สำหรับ Cloudflare Pages
+│       ├── public/_headers            CSP และ cache สำหรับ Cloudflare Pages (test เทียบกับ docs/11)
+│       ├── public/{favicon.svg,icons/} ไอคอนแอป
 │       └── src/
 │           ├── main.tsx, App.tsx
 │           ├── config/env.ts          ที่เดียวที่ใช้ import.meta.env

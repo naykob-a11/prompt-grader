@@ -6,6 +6,7 @@ tests/golden/
 playwright-report/
 test-results/
 dist/
+.wrangler/
 pnpm-lock.yaml
 .env*
 *.md

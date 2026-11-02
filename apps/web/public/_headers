@@ -1,0 +1,18 @@
+# Read by Cloudflare Pages. The policy must match docs/11; a test compares them.
+/*
+  Content-Security-Policy: default-src 'self'; img-src 'self' blob: data:; connect-src 'self'; style-src 'self'; font-src 'self'; worker-src 'self' blob:; base-uri 'self'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Hashed file names never change, so these can be cached for good.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# These must be rechecked, or a new version of the app would not reach returning users.
+/sw.js
+  Cache-Control: no-cache
+/registerSW.js
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Cache-Control: no-cache

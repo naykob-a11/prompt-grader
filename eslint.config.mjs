@@ -11,7 +11,7 @@ const forbid = (...modules) =>
   }));
 
 export default tseslint.config(
-  { ignores: ['**/dist/', 'reference/', 'playwright-report/', 'test-results/'] },
+  { ignores: ['**/dist/', 'reference/', 'playwright-report/', 'test-results/', '.wrangler/'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   // Engine module boundaries (docs/03 section 1).

@@ -31,6 +31,31 @@ node --test reference/sgp-reference.test.mjs   # ตัวอ่านอ้า�
 
 ตั้ง `base` ใน `vite.config.ts` ให้ตรงกับ path ที่โฮสต์ (เช่น GitHub Pages ใต้ `/prompt-grader/`)
 
+### 3.1 ตั้งค่า Cloudflare Pages
+
+ใช้ Git integration: Workers & Pages → Create → Pages → Connect to Git แล้วกรอกค่านี้
+
+| ช่อง | ค่า |
+|---|---|
+| Framework preset | None |
+| Build command | `pnpm build` |
+| Build output directory | `apps/web/dist` |
+| Root directory | เว้นว่าง (รากของ repo เพราะ build ต้องเห็น `seed/` และ `packages/`) |
+| Environment variable | `PNPM_VERSION` = รุ่นเดียวกับ `packageManager` ใน `package.json` ตอนนี้คือ `12.16.1` ทั้ง Production และ Preview |
+| Environment variable (เฉพาะ Preview) | `VITE_RELEASE_CHANNEL` = `preview` |
+
+- **`PNPM_VERSION` ขาดไม่ได้:** build image ใช้ pnpm 10 เป็นค่าเริ่มต้น และเอกสารของ Cloudflare ไม่ได้ระบุว่าอ่าน `packageManager` เปลี่ยนรุ่น pnpm เมื่อไรต้องแก้ค่านี้ด้วย
+- รุ่น Node อ่านจาก `.node-version`
+- ทดสอบ `_headers` ในเครื่องได้โดยไม่ต้องมีบัญชี:
+
+```bash
+pnpm build
+pnpm dlx wrangler pages dev apps/web/dist --port 8788
+E2E_BASE_URL=http://localhost:8788 pnpm test:e2e
+```
+
+`headers.spec.ts` ตรวจ header จริงเฉพาะเมื่อตั้ง `E2E_BASE_URL` เพราะ `pnpm preview` ไม่อ่าน `_headers` ใช้คำสั่งเดียวกันกับ URL จริงเป็น smoke test หลัง deploy ได้
+
 ## 4. CI (GitHub Actions)
 
 ```
@@ -38,7 +63,7 @@ on: [push, pull_request]
 jobs:
   check:   pnpm install --frozen-lockfile → lint → typecheck → test → node --test reference/sgp-reference.test.mjs → build
   e2e:     playwright install chromium → test:e2e
-deploy:    เมื่อ merge เข้า main → deploy ไปโฮสต์ที่เลือก
+deploy:    Cloudflare Pages build เองทุกครั้งที่ push จึงไม่มี job นี้ใน CI
 ```
 
 ## 5. Checklist ก่อน release
