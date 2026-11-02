@@ -18,4 +18,5 @@ export function createRenderer(canvas: HTMLCanvasElement, options: RendererOptio
 }
 
 export { CpuRenderer, GradeRenderer };
-export { planTiles, type Tile } from './gl/tiles';
+export { createExportGrader, GpuLostError, type ExportGrader } from './exportGrader';
+export { cropTile, planStrips, planTiles, type Tile } from './tiles';

@@ -75,16 +75,16 @@ prompt-grader/
 │           ├── config/envSchema.ts    ตรวจตัวแปร VITE_* ด้วย zod (ใช้ร่วมกับ vite.config.ts)
 │           ├── i18n/{th,en}.json
 │           ├── theme/tokens.css
-│           ├── store/{editorStore,libraryStore,promptStore}.ts
+│           ├── store/{editorStore,libraryStore,promptStore,exportStore}.ts
 │           ├── storage/{db,settings,libraryFile}.ts
-│           ├── services/{imageIO,openImage,sampleImage,prompts,promptSync,promptFiles,builtinText,clipboard,download}.ts
+│           ├── services/{imageIO,openImage,sampleImage,exportImage,exif,prompts,promptSync,promptFiles,builtinText,clipboard,download}.ts
 │           ├── features/
 │           │   ├── stage/             Stage (canvas, ซูม/เลื่อน), CompareSlider, Histogram, useRenderer
 │           │   ├── controls/          Controls, ParamGroup, ParamSlider (รวมแถบสี kind: 'hue')
 │           │   ├── library/           LibraryPanel, PromptItem, SaveBar, ImportExport
 │           │   ├── prompt-editor/     PromptPanel, PromptEditor, sgpLanguage, WarningList,
 │           │   │                      ChatBridgeDialog, NotesPanel
-│           │   └── export/            ExportDialog, Progress
+│           │   └── export/            ExportDialog
 │           └── shared/                Button, Dialog, Toast, useHotkeys
 │
 ├── tests/                             🔨 ทรัพยากรทดสอบร่วม

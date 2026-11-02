@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { env } from './config/env';
 import { Controls } from './features/controls/Controls';
+import { ExportDialog } from './features/export/ExportDialog';
 import { LibraryPanel } from './features/library/LibraryPanel';
 import { Stage } from './features/stage/Stage';
 import { t, type MessageKey } from './i18n';
@@ -35,6 +36,7 @@ const SHORTCUTS: readonly { keys: string; label: MessageKey }[] = [
   { keys: 'Ctrl+Z', label: 'shortcuts.undo' },
   { keys: 'Ctrl+Shift+Z', label: 'shortcuts.redo' },
   { keys: 'Ctrl+S', label: 'shortcuts.save' },
+  { keys: 'Ctrl+E', label: 'shortcuts.export' },
 ];
 
 // initLibrary subscribes for the page's lifetime, so it must run once despite StrictMode.
@@ -59,6 +61,8 @@ export default function App() {
   const canRedo = useEditor((s) => s.future.length > 0);
   const fileInput = useRef<HTMLInputElement>(null);
   const shortcuts = useRef<HTMLDialogElement>(null);
+  const exportDialog = useRef<HTMLDialogElement>(null);
+  const hasImage = useEditor((s) => s.image !== null);
 
   useEffect(() => {
     if (env.VITE_SHOW_SAMPLE_IMAGE && !editorStore.getState().image) openSampleImage();
@@ -100,6 +104,7 @@ export default function App() {
         if (event.ctrlKey || event.metaKey) {
           const key = event.key.toLowerCase();
           if (key === 's') void saveCurrent();
+          else if (key === 'e') exportDialog.current?.showModal();
           else if (key === 'z' && event.shiftKey) store.redo();
           else if (key === 'z') store.undo();
           else return false;
@@ -139,6 +144,13 @@ export default function App() {
             event.currentTarget.value = '';
           }}
         />
+        <button
+          type="button"
+          disabled={!hasImage}
+          onClick={() => exportDialog.current?.showModal()}
+        >
+          {t('top.export')}
+        </button>
         <button type="button" disabled={!canUndo} onClick={() => editorStore.getState().undo()}>
           {t('top.undo')}
         </button>
@@ -216,6 +228,7 @@ export default function App() {
         </form>
       </dialog>
 
+      <ExportDialog dialog={exportDialog} />
       <Toasts />
     </div>
   );

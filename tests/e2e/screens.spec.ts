@@ -28,6 +28,16 @@ for (const colorScheme of ['light', 'dark'] as const) {
     });
   }
 
+  test(`${colorScheme} export dialog`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme });
+    await page.setViewportSize({ width: 360, height: 740 });
+    await page.goto('/');
+    await expect(page.getByTestId('stage-info')).not.toBeEmpty();
+    await page.keyboard.press('Control+e');
+    await expect(page.getByRole('button', { name: 'ส่งออกภาพความละเอียดเต็ม' })).toBeVisible();
+    await page.screenshot({ path: `test-results/screens/${colorScheme}-export.png` });
+  });
+
   test(`${colorScheme} hue sliders`, async ({ page }) => {
     await page.emulateMedia({ colorScheme });
     await page.goto('/');

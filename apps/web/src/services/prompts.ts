@@ -5,6 +5,7 @@ import { db } from '../storage/db';
 import { LibraryFileError, parseLibraryFile, serializeLibrary } from '../storage/libraryFile';
 import { loadSettings, saveSetting } from '../storage/settings';
 import { editorStore, hasUnsavedChanges } from '../store/editorStore';
+import { exportStore } from '../store/exportStore';
 import { BUILTIN_VIEWS, libraryStore, toView, type PromptView } from '../store/libraryStore';
 import { hasUnsavedMeta, promptStore } from '../store/promptStore';
 import { BUILTIN_TEXT } from './builtinText';
@@ -23,13 +24,17 @@ const reportStorageError = () => showToast(t('error.storage'), 'error');
 /** Loads saved prompts and settings, then keeps the settings in step with the editor. */
 export async function initLibrary(): Promise<void> {
   startPromptSync();
+  const startingParams = editorStore.getState().params;
   try {
     await libraryStore.getState().load();
     const settings = await loadSettings(db);
     const editor = editorStore.getState();
     editor.setCompareMode(settings.compareMode);
+    const { exportFormat, jpegQuality, keepExif, stripGps } = settings;
+    exportStore.setState({ exportFormat, jpegQuality, keepExif, stripGps });
     const last = allViews().find((view) => view.id === settings.lastPromptId);
-    if (last) editor.restorePrompt(last);
+    // Storage can answer after the user has started, and their work comes first.
+    if (last && editorStore.getState().params === startingParams) editor.restorePrompt(last);
     remindToBackUp(settings.lastBackupAt);
   } catch {
     reportStorageError();

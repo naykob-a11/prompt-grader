@@ -15,6 +15,8 @@ const COMPARE_ORDER: readonly CompareMode[] = ['split', 'after', 'before'];
 
 export interface OpenImage {
   name: string;
+  /** The original file, which an export reads again at full size. Null for the sample. */
+  file: File | null;
   /** Preview pixels, at most VITE_PREVIEW_MAX_SIDE on the long side. */
   preview: RawImage;
   ctx: GradeContext;

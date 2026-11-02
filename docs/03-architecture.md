@@ -43,6 +43,8 @@ src/
     worker.ts          Worker entry: เก็บภาพไว้ แล้วเกรดทุกครั้งที่ได้ params ใหม่
     cpuRenderer.ts     Renderer สำรอง: ส่งงานให้ worker แล้ววาดด้วย putImageData
   createRenderer.ts    เลือก backend (import ผ่าน @prompt-grader/engine/renderer)
+  exportGrader.ts      เกรดภาพเต็มทีละชิ้น ทั้งแบบ GPU และ CPU
+  tiles.ts             วางแผนไทล์และแถบ + ขอบซ้อน
   types.ts             GradeContext, RawImage, Renderer
   gl/
     renderer.ts        class GradeRenderer { setImage(), setParams(), render(), readPixels(), renderTiles() }
@@ -51,7 +53,6 @@ src/
       detail.frag      pass 1
       grade.frag       pass 2 (uniform ต่อพารามิเตอร์ทั้งหมด)
     uniforms.ts        แมป params → uniform values (สร้างจาก schema อัตโนมัติ)
-    tiles.ts           วางแผนไทล์ + ขอบซ้อน
   index.ts
 test/
   identity, extremes, tiling, bw, schema, migrate, prototype, golden .test.ts
@@ -84,7 +85,7 @@ interface Renderer {
 - Pass 1 `detail.frag` → FBO RGBA8 (ข้ามเมื่อ sharpen = denoise = 0) ตั้งใจให้เป็น 8 บิตเหมือนฝั่ง CPU จึงไม่ต้องใช้ `EXT_color_buffer_float`
 - Pass 2 `grade.frag` → canvas หรือ FBO สำหรับไทล์ (อ่านผล pass 1 และ texture ต้นฉบับสำหรับขั้น mix)
 - พรีวิว: ผู้เรียกย่อภาพเป็น ≤ 2048 px ก่อนส่งเข้า `setImage` เพราะต้องใช้พิกเซลชุดนี้คำนวณ gray-world อยู่แล้ว
-- ส่งออก: `renderTiles()` ไทล์ขนาด min(MAX_TEXTURE_SIZE, 4096) ขอบซ้อน 2 px, `readPixels` ทีละไทล์ส่งให้ callback
+- ส่งออก (`exportGrader.ts`): ไทล์ขนาด min(MAX_TEXTURE_SIZE, 4096) ขอบซ้อน 2 px ผ่าน `gradeTile()` อ่านภาพจาก `ImageBitmap` ทีละไทล์เพื่อไม่ถือภาพเต็มสองชุด แล้วเขียนลง `OffscreenCanvas` ขนาดจริง ถ้าไม่มี GPU หรือ GPU หายกลางทาง ใช้แถบ 256 แถวใน Worker แทน
 - ไม่มี WebGL2 → `createRenderer` คืน CPU renderer
 - context lost → เรียก `onContextLost` ผู้เรียกต้องสร้าง canvas ใหม่ แล้วเรียก `createRenderer` ด้วย `forceCpu` เพราะ canvas ที่เคยมี WebGL context ใช้ 2D ไม่ได้
 
@@ -102,7 +103,8 @@ src/
     db.ts                         ← Dexie: prompts, settings
     libraryFile.ts                ← export/import JSON + validation
   services/
-    imageIO.ts                    ← decode, encode, EXIF copy
+    imageIO.ts                    ← decode, ย่อภาพพรีวิว
+    exportImage.ts, exif.ts       ← ส่งออกความละเอียดเต็ม, คัดลอก EXIF
     promptFiles.ts                ← อ่าน/เขียน .sgp.txt, ตรวจ UTF-8 และขนาด
     clipboard.ts                  ← คัดลอกคำสั่งสำหรับแชต, คัดลอกพร้อมต์
   features/

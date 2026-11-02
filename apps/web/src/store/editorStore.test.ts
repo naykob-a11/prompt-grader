@@ -93,6 +93,7 @@ describe('editor store', () => {
     drag(store, 30);
     store.getState().setImage({
       name: 'a.png',
+      file: null,
       preview: { data: new Uint8ClampedArray(4), width: 1, height: 1 },
       ctx: { wbGains: [1, 1, 1], fullWidth: 1, fullHeight: 1 },
       width: 1,

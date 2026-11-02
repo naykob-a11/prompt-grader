@@ -46,6 +46,14 @@ test('the app works under the content security policy', async ({ page }) => {
   });
   expect(fonts).toBe(true);
 
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Control+e');
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'ส่งออกภาพความละเอียดเต็ม' }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/\.jpg$/);
+
   const violations = await page.evaluate(
     () => (window as unknown as { violations: string[] }).violations,
   );

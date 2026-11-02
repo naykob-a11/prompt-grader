@@ -2,7 +2,7 @@ import { expect, test } from 'vitest';
 import { PARAM_KEYS } from '../src';
 import detailFrag from '../src/gl/shaders/detail.frag?raw';
 import gradeFrag from '../src/gl/shaders/grade.frag?raw';
-import { planTiles, TILE_PADDING } from '../src/gl/tiles';
+import { cropTile, planStrips, planTiles, TILE_PADDING } from '../src/tiles';
 import { withParamUniforms } from '../src/gl/uniforms';
 
 test('the grade shader uses every parameter except the two owned by the detail pass', () => {
@@ -47,4 +47,24 @@ test.each([
 
 test('a tile too small for its padding is refused', () => {
   expect(() => planTiles(10, 10, 4)).toThrow();
+});
+
+test('strips cover every row once, padded by one row between neighbours', () => {
+  const strips = planStrips(100, 25, 10);
+  expect(strips.map((s) => [s.y, s.height])).toEqual([
+    [0, 10],
+    [10, 10],
+    [20, 5],
+  ]);
+  expect(strips.map((s) => s.y - s.srcY)).toEqual([0, 1, 1]);
+  expect(strips.map((s) => s.srcHeight)).toEqual([11, 12, 6]);
+  expect(strips.every((s) => s.x === 0 && s.width === 100 && s.srcWidth === 100)).toBe(true);
+});
+
+test('cropTile copies the padded region, row by row', () => {
+  const data = new Uint8ClampedArray(4 * 4 * 4);
+  for (let i = 0; i < 16; i++) data[i * 4] = i;
+  const image = { data, width: 4, height: 4 };
+  const tile = { x: 1, y: 1, width: 1, height: 1, srcX: 1, srcY: 1, srcWidth: 2, srcHeight: 2 };
+  expect([...cropTile(image, tile)].filter((_, i) => i % 4 === 0)).toEqual([5, 6, 9, 10]);
 });

@@ -4,7 +4,7 @@ import type { GradeContext, RawImage, Renderer } from '../types';
 import detailFrag from './shaders/detail.frag?raw';
 import fullscreenVert from './shaders/fullscreen.vert?raw';
 import gradeFrag from './shaders/grade.frag?raw';
-import { planTiles, type Tile } from './tiles';
+import type { Tile } from '../tiles';
 import {
   paramLocations,
   setParamUniforms,
@@ -107,6 +107,8 @@ export class GradeRenderer implements Renderer {
   private ctx: GradeContext | null = null;
   private params: Params = DEFAULT_PARAMS;
   private frame = 0;
+  /** Set for a renderer that owns its canvas, whose context nothing will reuse. */
+  releaseContext = false;
 
   /** Returns null when the browser has no WebGL2, so the caller can fall back to the CPU. */
   static create(canvas: HTMLCanvasElement, onContextLost?: () => void): GradeRenderer | null {
@@ -190,22 +192,26 @@ export class GradeRenderer implements Renderer {
   }
 
   /**
-   * Grades `image` tile by tile and hands each tile's pixels to `onTile`. Spatial stages use the
-   * full-image size in `ctx`, so the seams match a single pass. The buffer is reused between
-   * calls. Replaces the uploaded image: call setImage again before drawing to the canvas.
+   * Grades one tile, given the pixels of its padded region. Spatial stages use the full-image
+   * size in `ctx`, so the seams match a single pass. Replaces the uploaded image: call setImage
+   * again before drawing to the canvas.
    */
-  renderTiles(
-    image: RawImage,
+  gradeTile(
+    region: Uint8ClampedArray,
+    tile: Tile,
     params: Params,
     ctx: GradeContext,
-    tileSize: number,
-    onTile: (tile: Tile, pixels: Uint8ClampedArray) => void,
-  ): void {
-    const limit = Math.min(tileSize, this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE) as number);
-    for (const tile of planTiles(image.width, image.height, limit)) {
-      this.upload(cropRegion(image, tile), tile.srcWidth, tile.srcHeight);
-      onTile(tile, this.gradeToMemory(tile, params, ctx));
-    }
+  ): Uint8ClampedArray {
+    this.upload(region, tile.srcWidth, tile.srcHeight);
+    return this.gradeToMemory(tile, params, ctx);
+  }
+
+  get maxTextureSize(): number {
+    return this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE) as number;
+  }
+
+  get contextLost(): boolean {
+    return this.gl.isContextLost();
   }
 
   /** Waits for the GPU to finish everything queued so far. */
@@ -223,6 +229,8 @@ export class GradeRenderer implements Renderer {
     gl.deleteProgram(this.detailPass.program);
     gl.deleteProgram(this.gradePass.program);
     gl.deleteVertexArray(this.vao);
+    // Browsers limit live WebGL contexts, so give this one back instead of waiting for GC.
+    if (this.releaseContext) gl.getExtension('WEBGL_lose_context')?.loseContext();
   }
 
   private schedule(): void {
@@ -287,13 +295,4 @@ export class GradeRenderer implements Renderer {
 function wholeImage(image: RawImage): Tile {
   const { width, height } = image;
   return { x: 0, y: 0, width, height, srcX: 0, srcY: 0, srcWidth: width, srcHeight: height };
-}
-
-function cropRegion(image: RawImage, tile: Tile): Uint8ClampedArray {
-  const out = new Uint8ClampedArray(tile.srcWidth * tile.srcHeight * 4);
-  for (let row = 0; row < tile.srcHeight; row++) {
-    const start = ((tile.srcY + row) * image.width + tile.srcX) * 4;
-    out.set(image.data.subarray(start, start + tile.srcWidth * 4), row * tile.srcWidth * 4);
-  }
-  return out;
 }

@@ -1,3 +1,5 @@
+import type { RawImage } from './types';
+
 /** The padding each tile needs: 1 px for the 3x3 detail kernel, plus 1 px of margin. */
 export const TILE_PADDING = 2;
 
@@ -45,4 +47,35 @@ export function planTiles(
     }
   }
   return tiles;
+}
+
+/** Whole-width strips for the CPU, with one row of padding for the 3x3 detail kernel. */
+export function planStrips(W: number, H: number, rows: number): Tile[] {
+  const strips: Tile[] = [];
+  for (let y = 0; y < H; y += rows) {
+    const height = Math.min(rows, H - y);
+    const srcY = Math.max(0, y - 1);
+    const srcBottom = Math.min(H, y + height + 1);
+    strips.push({
+      x: 0,
+      y,
+      width: W,
+      height,
+      srcX: 0,
+      srcY,
+      srcWidth: W,
+      srcHeight: srcBottom - srcY,
+    });
+  }
+  return strips;
+}
+
+/** Copies a tile's padded region out of a whole image. */
+export function cropTile(image: RawImage, tile: Tile): Uint8ClampedArray {
+  const out = new Uint8ClampedArray(tile.srcWidth * tile.srcHeight * 4);
+  for (let row = 0; row < tile.srcHeight; row++) {
+    const start = ((tile.srcY + row) * image.width + tile.srcX) * 4;
+    out.set(image.data.subarray(start, start + tile.srcWidth * 4), row * tile.srcWidth * 4);
+  }
+  return out;
 }

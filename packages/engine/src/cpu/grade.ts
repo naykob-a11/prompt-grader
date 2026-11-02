@@ -1,5 +1,6 @@
 import { hash2, hueOffset, luminance, smoothstep } from '../math';
 import type { Params } from '../schema';
+import { planStrips, type Tile } from '../tiles';
 import type { GradeContext } from '../types';
 import { detail } from './detail';
 
@@ -267,6 +268,29 @@ export function gradePixels(
   }
 }
 
+/** Detail and grade for one strip, given its rows plus the padding rows around them. */
+export function gradeStrip(
+  region: Uint8ClampedArray,
+  strip: Tile,
+  params: Params,
+  ctx: GradeContext,
+): Uint8ClampedArray {
+  const { y, width: w, height: rows, srcHeight } = strip;
+  const padTop = y - strip.srcY;
+  const top = padTop * w * 4;
+  const bottom = (padTop + rows) * w * 4;
+  const orig = region.subarray(top, bottom);
+  const dst = new Uint8ClampedArray(orig.length);
+  if (params.sharpen > 0 || params.denoise > 0) {
+    const padded = region.slice();
+    detail(padded, w, srcHeight, params, padTop, padTop + rows);
+    gradePixels(orig, padded.subarray(top, bottom), dst, w, rows, y, params, ctx);
+  } else {
+    gradePixels(orig, orig, dst, w, rows, y, params, ctx);
+  }
+  return dst;
+}
+
 /** Runs detail and grade over a whole image, `stripRows` rows at a time. */
 export function gradeImage(
   src: Uint8ClampedArray,
@@ -277,21 +301,9 @@ export function gradeImage(
   stripRows = h,
 ): Uint8ClampedArray {
   const dst = new Uint8ClampedArray(src.length);
-  const hasDetail = params.sharpen > 0 || params.denoise > 0;
-  for (let y = 0; y < h; y += stripRows) {
-    const rows = Math.min(stripRows, h - y);
-    const orig = src.subarray(y * w * 4, (y + rows) * w * 4);
-    const out = dst.subarray(y * w * 4, (y + rows) * w * 4);
-    if (!hasDetail) {
-      gradePixels(orig, orig, out, w, rows, y, params, ctx);
-      continue;
-    }
-    const padTop = y > 0 ? 1 : 0;
-    const padBottom = y + rows < h ? 1 : 0;
-    const padded = src.slice((y - padTop) * w * 4, (y + rows + padBottom) * w * 4);
-    detail(padded, w, rows + padTop + padBottom, params, padTop, padTop + rows);
-    const core = padded.subarray(padTop * w * 4, (padTop + rows) * w * 4);
-    gradePixels(orig, core, out, w, rows, y, params, ctx);
+  for (const strip of planStrips(w, h, stripRows)) {
+    const region = src.subarray(strip.srcY * w * 4, (strip.srcY + strip.srcHeight) * w * 4);
+    dst.set(gradeStrip(region, strip, params, ctx), strip.y * w * 4);
   }
   return dst;
 }

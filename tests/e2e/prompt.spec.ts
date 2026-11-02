@@ -146,7 +146,7 @@ test('every seed file attaches with no warnings and matches its preset', async (
     });
     const values = await page.evaluate(() =>
       Object.fromEntries(
-        [...document.querySelectorAll<HTMLInputElement>('input[type=range]')].map((input) => [
+        [...document.querySelectorAll<HTMLInputElement>('input[id^=param-]')].map((input) => [
           input.id.replace('param-', ''),
           Number(input.value),
         ]),

@@ -9,7 +9,12 @@ import {
   type Params,
   type RawImage,
 } from '../../../packages/engine/src';
-import { createRenderer, GradeRenderer } from '../../../packages/engine/src/createRenderer';
+import {
+  cropTile,
+  createRenderer,
+  GradeRenderer,
+  planTiles,
+} from '../../../packages/engine/src/createRenderer';
 import { syntheticRamps } from '../../../packages/engine/test/support/synthetic';
 
 export interface Comparison {
@@ -128,7 +133,9 @@ const harness = {
     return BUILTIN_PRESETS.map((preset) => {
       const cpu = gradeImage(image.data, image.width, image.height, preset.params, ctx);
       const out = new Uint8ClampedArray(image.data.length);
-      renderer.renderTiles(image, preset.params, ctx, tileSize, (tile, pixels) => {
+      const limit = Math.min(tileSize, renderer.maxTextureSize);
+      for (const tile of planTiles(image.width, image.height, limit)) {
+        const pixels = renderer.gradeTile(cropTile(image, tile), tile, preset.params, ctx);
         for (let row = 0; row < tile.height; row++) {
           const start = row * tile.width * 4;
           out.set(
@@ -136,7 +143,7 @@ const harness = {
             ((tile.y + row) * image.width + tile.x) * 4,
           );
         }
-      });
+      }
       return compare(`${preset.id} tiles of ${tileSize}`, cpu, out);
     });
   },

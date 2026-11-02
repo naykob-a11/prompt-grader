@@ -8,13 +8,14 @@ import { makeSampleImage } from './sampleImage';
 
 function publish(
   name: string,
+  file: File | null,
   preview: RawImage,
   width: number,
   height: number,
-  isSample: boolean,
 ) {
   editorStore.getState().setImage({
     name,
+    file,
     preview,
     ctx: {
       wbGains: grayWorld(preview.data),
@@ -23,7 +24,7 @@ function publish(
     },
     width,
     height,
-    isSample,
+    isSample: file === null,
   });
 }
 
@@ -34,7 +35,7 @@ export async function openImageFile(file: File): Promise<void> {
     if (megapixels > env.VITE_MAX_IMAGE_MEGAPIXELS) {
       showToast(t('warning.largeImage', { megapixels: Math.round(megapixels) }));
     }
-    publish(file.name, decoded.preview, decoded.width, decoded.height, false);
+    publish(file.name, file, decoded.preview, decoded.width, decoded.height);
   } catch {
     showToast(t('error.notImage'), 'error');
   }
@@ -42,5 +43,5 @@ export async function openImageFile(file: File): Promise<void> {
 
 export function openSampleImage(): void {
   const sample = makeSampleImage();
-  publish(t('stage.sample'), sample, sample.width, sample.height, true);
+  publish(t('stage.sample'), null, sample, sample.width, sample.height);
 }

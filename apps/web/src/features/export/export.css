@@ -1,0 +1,63 @@
+.export {
+  width: min(420px, calc(100vw - 32px));
+}
+
+.export[open] {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.export h2 {
+  margin: 0;
+}
+
+.export fieldset {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.export legend {
+  margin-bottom: var(--space-1);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.export-formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.export-formats label,
+.export-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.export input[type='radio'],
+.export input[type='checkbox'],
+.export input[type='range'] {
+  accent-color: var(--accent);
+}
+
+.export-quality {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.export-info {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.export progress {
+  width: 100%;
+  accent-color: var(--accent);
+}
