@@ -3,6 +3,7 @@ import { env } from './config/env';
 import { Controls } from './features/controls/Controls';
 import { ExportDialog } from './features/export/ExportDialog';
 import { LibraryPanel } from './features/library/LibraryPanel';
+import { ReferenceWindow } from './features/reference/ReferenceWindow';
 import { Stage } from './features/stage/Stage';
 import { t, type MessageKey } from './i18n';
 import { openImageFile, openSampleImage } from './services/openImage';
@@ -62,6 +63,7 @@ export default function App() {
   const fileInput = useRef<HTMLInputElement>(null);
   const shortcuts = useRef<HTMLDialogElement>(null);
   const exportDialog = useRef<HTMLDialogElement>(null);
+  const referenceDialog = useRef<HTMLDialogElement>(null);
   const hasImage = useEditor((s) => s.image !== null);
   const unsaved = useEditor(hasUnsavedChanges);
 
@@ -145,6 +147,13 @@ export default function App() {
             event.currentTarget.value = '';
           }}
         />
+        <button
+          type="button"
+          disabled={!hasImage}
+          onClick={() => referenceDialog.current?.showModal()}
+        >
+          {t('top.reference')}
+        </button>
         <button
           type="button"
           disabled={!hasImage}
@@ -234,6 +243,7 @@ export default function App() {
         </form>
       </dialog>
 
+      <ReferenceWindow dialog={referenceDialog} />
       <ExportDialog dialog={exportDialog} />
       <Toasts />
     </div>

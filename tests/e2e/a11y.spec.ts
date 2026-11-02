@@ -51,6 +51,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
         await page.keyboard.press('Escape');
         await page.getByRole('button', { name: 'ทางลัด' }).click();
         await expectNoViolations(page, 'shortcuts dialog');
+        await page.keyboard.press('Escape');
+        await page.getByRole('button', { name: 'สร้างจากภาพอ้างอิง' }).click();
+        await expectNoViolations(page, 'reference dialog');
       });
     });
   }

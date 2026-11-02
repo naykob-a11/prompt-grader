@@ -71,6 +71,7 @@ prompt-grader/
 │       ├── vite.config.ts             PWA plugin, base path
 │       ├── public/_headers            CSP และ cache สำหรับ Cloudflare Pages (test เทียบกับ docs/11)
 │       ├── public/{favicon.svg,icons/} ไอคอนแอป
+│       ├── public/boot.js             แจ้งสาเหตุเมื่อ bundle โหลดหรืออ่านไม่ได้
 │       └── src/
 │           ├── main.tsx, App.tsx
 │           ├── config/env.ts          ที่เดียวที่ใช้ import.meta.env
@@ -83,7 +84,8 @@ prompt-grader/
 │           ├── features/
 │           │   ├── stage/             Stage (canvas, ซูม/เลื่อน), CompareSlider, Histogram, useRenderer
 │           │   ├── controls/          Controls, ParamGroup, ParamSlider (รวมแถบสี kind: 'hue')
-│           │   ├── library/           LibraryPanel, PromptItem, SaveBar, ReferenceTone, ImportExport
+│           │   ├── library/           LibraryPanel, PromptItem, SaveBar, ImportExport
+│           │   ├── reference/         ReferenceWindow, DraftEditor, useDraftPreview
 │           │   ├── prompt-editor/     PromptPanel, PromptEditor, sgpLanguage, WarningList,
 │           │   │                      ChatBridgeDialog, NotesPanel
 │           │   └── export/            ExportDialog

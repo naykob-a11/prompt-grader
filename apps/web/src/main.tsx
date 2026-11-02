@@ -11,6 +11,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import { env } from './config/env';
+import { ErrorBoundary } from './shared/ErrorBoundary';
 
 document.title = env.VITE_APP_NAME;
 document.documentElement.lang = env.VITE_DEFAULT_LOCALE;
@@ -20,6 +21,8 @@ if (env.VITE_DEFAULT_THEME !== 'system') {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 );

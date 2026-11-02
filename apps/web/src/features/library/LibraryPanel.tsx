@@ -12,7 +12,6 @@ import {
 import { ImportExport } from './ImportExport';
 import './library.css';
 import { PromptItem } from './PromptItem';
-import { ReferenceTone } from './ReferenceTone';
 import { SaveBar } from './SaveBar';
 
 function PromptList({ views, label }: { views: readonly PromptView[]; label: string }) {
@@ -47,7 +46,6 @@ export function LibraryPanel() {
     <>
       <h2 className="visually-hidden">{t('library.label')}</h2>
       <SaveBar />
-      <ReferenceTone />
 
       <input
         type="search"

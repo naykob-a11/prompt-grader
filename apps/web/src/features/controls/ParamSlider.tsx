@@ -17,11 +17,26 @@ function spoken(def: ParamDef, value: number): string {
   return String(value);
 }
 
-export function ParamSlider({ def }: { def: ParamDef }) {
+interface ParamFieldProps {
+  def: ParamDef;
+  value: number;
+  onChange(value: number): void;
+  onReset(): void;
+  onCommit?(): void;
+  idPrefix?: string;
+}
+
+/** A slider that holds no state, for wherever the value lives. */
+export function ParamField({
+  def,
+  value,
+  onChange,
+  onReset,
+  onCommit,
+  idPrefix = 'param',
+}: ParamFieldProps) {
   const key = def.key as ParamKey;
-  const value = useEditor((s) => s.params[key]);
-  const id = `param-${def.key}`;
-  const { setParam, commitEdit, resetParam } = editorStore.getState();
+  const id = `${idPrefix}-${def.key}`;
   const neutral = ((DEFAULT_PARAMS[key] - def.min) / (def.max - def.min)) * 100;
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -30,7 +45,7 @@ export function ParamSlider({ def }: { def: ParamDef }) {
     if (!direction) return;
     event.preventDefault();
     const next = value + direction * SHIFT_STEP;
-    setParam(key, Math.min(def.max, Math.max(def.min, next)));
+    onChange(Math.min(def.max, Math.max(def.min, next)));
   };
 
   return (
@@ -39,7 +54,7 @@ export function ParamSlider({ def }: { def: ParamDef }) {
       data-kind={def.kind}
       style={{ '--neutral': `${neutral}%` } as CSSProperties}
     >
-      <label htmlFor={id} onDoubleClick={() => resetParam(key)}>
+      <label htmlFor={id} onDoubleClick={onReset}>
         {def.label[locale]}
       </label>
       {def.kind === 'hue' && (
@@ -58,13 +73,28 @@ export function ParamSlider({ def }: { def: ParamDef }) {
           value={value}
           aria-valuetext={spoken(def, value)}
           title={def.desc}
-          onChange={(event) => setParam(key, event.currentTarget.valueAsNumber)}
+          onChange={(event) => onChange(event.currentTarget.valueAsNumber)}
           onKeyDown={onKeyDown}
-          onKeyUp={commitEdit}
-          onPointerUp={commitEdit}
-          onBlur={commitEdit}
+          onKeyUp={onCommit}
+          onPointerUp={onCommit}
+          onBlur={onCommit}
         />
       </div>
     </div>
+  );
+}
+
+export function ParamSlider({ def }: { def: ParamDef }) {
+  const key = def.key as ParamKey;
+  const value = useEditor((s) => s.params[key]);
+  const { setParam, commitEdit, resetParam } = editorStore.getState();
+  return (
+    <ParamField
+      def={def}
+      value={value}
+      onChange={(next) => setParam(key, next)}
+      onReset={() => resetParam(key)}
+      onCommit={commitEdit}
+    />
   );
 }

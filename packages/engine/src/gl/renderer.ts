@@ -93,6 +93,8 @@ class Target {
   }
 }
 
+let gpuUsable: boolean | null = null;
+
 export class GradeRenderer implements Renderer {
   readonly backend = 'webgl2';
 
@@ -110,7 +112,10 @@ export class GradeRenderer implements Renderer {
   /** Set for a renderer that owns its canvas, whose context nothing will reuse. */
   releaseContext = false;
 
-  /** Returns null when the browser has no WebGL2, so the caller can fall back to the CPU. */
+  /**
+   * Returns null when the browser has no WebGL2 or its driver rejects the shaders, so the caller
+   * can fall back to the CPU. Either way the canvas may be taken: see `usable`.
+   */
   static create(canvas: HTMLCanvasElement, onContextLost?: () => void): GradeRenderer | null {
     const gl = canvas.getContext('webgl2', {
       alpha: false,
@@ -119,7 +124,29 @@ export class GradeRenderer implements Renderer {
       stencil: false,
       premultipliedAlpha: false,
     });
-    return gl ? new GradeRenderer(canvas, gl, onContextLost) : null;
+    if (!gl) return null;
+    try {
+      return new GradeRenderer(canvas, gl, onContextLost);
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  /**
+   * True when this device can run the shaders, tried on a spare canvas because a canvas that held
+   * a WebGL context cannot be reused for the 2D fallback. The answer is kept for the session.
+   */
+  static usable(): boolean {
+    if (gpuUsable === null) {
+      const probe = GradeRenderer.create(document.createElement('canvas'));
+      gpuUsable = probe !== null;
+      if (probe) {
+        probe.releaseContext = true;
+        probe.dispose();
+      }
+    }
+    return gpuUsable;
   }
 
   private constructor(

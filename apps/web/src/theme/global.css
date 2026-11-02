@@ -283,3 +283,26 @@ button[aria-selected='true'] {
     transition: none !important;
   }
 }
+
+.boot {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--space-4);
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+
+.boot h1 {
+  font-size: 18px;
+}
+
+.boot p {
+  margin: 0;
+}
+
+.boot code {
+  color: var(--muted);
+  font-size: 13px;
+}

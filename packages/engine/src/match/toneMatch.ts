@@ -35,6 +35,13 @@ const TINTS: readonly (readonly [ParamKey, ParamKey])[] = [
 const TINT_LIMIT = 70;
 const VARIABLES = SCALARS.length + TINTS.length * 2;
 
+/** The parameters a match can change, plus the overall strength. */
+export const MATCHED_KEYS: readonly ParamKey[] = [
+  'amount',
+  ...SCALARS.map(([key]) => key),
+  ...TINTS.flat(),
+];
+
 const HUE_BINS = 12;
 const MIN_HUE_CHROMA = 6;
 /** Mean chroma under which a reference counts as black and white. */

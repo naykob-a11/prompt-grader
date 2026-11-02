@@ -12,6 +12,7 @@ async function openFixture(page: Page) {
 
 /** Waits for the frame after a change, so a screenshot never sees the previous one. */
 async function shot(page: Page) {
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.evaluate(
     () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
   );

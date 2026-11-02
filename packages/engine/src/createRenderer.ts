@@ -13,7 +13,8 @@ export interface RendererOptions {
 }
 
 export function createRenderer(canvas: HTMLCanvasElement, options: RendererOptions = {}): Renderer {
-  const gpu = options.forceCpu ? null : GradeRenderer.create(canvas, options.onContextLost);
+  const useGpu = !options.forceCpu && GradeRenderer.usable();
+  const gpu = useGpu ? GradeRenderer.create(canvas, options.onContextLost) : null;
   return gpu ?? new CpuRenderer(canvas);
 }
 
