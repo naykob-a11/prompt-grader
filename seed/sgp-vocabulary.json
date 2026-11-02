@@ -1,0 +1,102 @@
+{
+  "format": "prompt-grader/sgp-vocabulary",
+  "version": 1,
+  "notes": "Vocabulary for the Structured Grading Prompt (SGP). The first alias of each entry is the canonical label written by the serializer. Matching is case-insensitive, whitespace-insensitive, longest alias first.",
+
+  "intensity": [
+    { "value": 10,  "words": ["นิดเดียว", "แผ่วมาก", "แค่แตะ", "very subtle", "hint", "touch"] },
+    { "value": 20,  "words": ["เล็กน้อย", "นิดหน่อย", "บาง", "เบา", "slight", "subtle", "gentle", "light"] },
+    { "value": 35,  "words": ["ปานกลาง", "พอดี", "กลาง ๆ", "moderate", "medium"] },
+    { "value": 50,  "words": ["ชัด", "ค่อนข้างมาก", "ชัดเจน", "noticeable", "clear", "strong-ish"] },
+    { "value": 65,  "words": ["มาก", "หนัก", "strong", "heavy", "rich"] },
+    { "value": 100, "words": ["มากที่สุด", "สุด", "เต็มที่", "maximum", "max", "extreme"] }
+  ],
+  "defaultIntensity": 35,
+
+  "positive": ["เพิ่ม", "มากขึ้น", "ขึ้น", "more", "increase", "raise", "up"],
+  "negative": ["ลด", "น้อยลง", "ลง", "less", "decrease", "lower", "down"],
+  "neutral":  ["ไม่ปรับ", "ปิด", "ไม่มี", "คงเดิม", "none", "off", "neutral"],
+
+  "colors": [
+    { "hue": 0,   "words": ["แดง", "red"] },
+    { "hue": 30,  "words": ["ส้ม", "orange"] },
+    { "hue": 40,  "words": ["ครีม", "cream"] },
+    { "hue": 48,  "words": ["ทอง", "gold", "golden"] },
+    { "hue": 58,  "words": ["เหลือง", "yellow"] },
+    { "hue": 80,  "words": ["มะกอก", "olive"] },
+    { "hue": 125, "words": ["เขียว", "green"] },
+    { "hue": 188, "words": ["เขียวอมฟ้า", "ทีล", "teal", "cyan"] },
+    { "hue": 205, "words": ["ฟ้า", "sky blue", "light blue"] },
+    { "hue": 225, "words": ["น้ำเงิน", "blue"] },
+    { "hue": 270, "words": ["ลาเวนเดอร์", "lavender"] },
+    { "hue": 285, "words": ["ม่วง", "purple", "violet"] },
+    { "hue": 315, "words": ["ม่วงแดง", "magenta"] },
+    { "hue": 335, "words": ["ชมพู", "pink", "rose"] }
+  ],
+
+  "params": [
+    { "key": "amount",     "aliases": ["ความเข้มรวม", "amount", "strength", "overall"] },
+    { "key": "exposure",   "aliases": ["ความสว่าง", "แสง", "exposure", "brightness"],
+      "positive": ["สว่างขึ้น", "brighter"], "negative": ["มืดลง", "darker"] },
+    { "key": "contrast",   "aliases": ["คอนทราสต์", "contrast"],
+      "positive": ["แข็งขึ้น", "punchy"], "negative": ["นุ่ม", "ต่ำ", "soft", "flat"] },
+    { "key": "highlights", "aliases": ["ไฮไลต์", "highlights"],
+      "positive": ["สว่างขึ้น", "boost"], "negative": ["กด", "เก็บ", "recover"] },
+    { "key": "shadows",    "aliases": ["เงา", "shadows"],
+      "positive": ["ยก", "เปิด", "สว่างขึ้น", "lift", "open"], "negative": ["ลึก", "เข้ม", "กด", "deepen", "deep", "crush", "darker"] },
+    { "key": "saturation", "aliases": ["ความอิ่มสี", "ความสดของสี", "saturation"],
+      "positive": ["สด", "vivid"], "negative": ["จาง", "ซีด", "หม่น", "muted"],
+      "special": { "ขาวดำ": -100, "black and white": -100, "monochrome": -100 } },
+    { "key": "vibrance",   "aliases": ["ไวบรานซ์", "vibrance"],
+      "positive": ["สด", "vivid"], "negative": ["จาง", "muted"] },
+    { "key": "temp",       "aliases": ["อุณหภูมิสี", "อุณหภูมิ", "white balance", "temperature", "temp"],
+      "positive": ["อุ่น", "warm", "warmer"], "negative": ["เย็น", "cool", "cooler"] },
+    { "key": "tint",       "aliases": ["ทินต์", "tint"],
+      "positive": ["ม่วงแดง", "magenta"], "negative": ["เขียว", "green"] },
+    { "key": "castFix",    "aliases": ["แก้สีเพี้ยน", "แก้สีเพี้ยนอัตโนมัติ", "color cast", "cast fix"] },
+    { "key": "dehaze",     "aliases": ["ลดความมัว", "ลดมัว", "dehaze", "clarity haze"] },
+    { "key": "sharpen",    "aliases": ["ความคมชัด", "ความคม", "sharpness", "sharpen"] },
+    { "key": "denoise",    "aliases": ["ลดจุดรบกวน", "ลดนอยส์", "noise reduction", "denoise"] },
+    { "key": "teal",       "aliases": ["ใบไม้โทนทีล", "ใบไม้ทีล", "foliage teal", "teal greens"] },
+    { "key": "forest",     "aliases": ["เขียวป่า", "ความลึกเขียวป่า", "forest green", "forest"] },
+    { "key": "sun",        "aliases": ["แดดบนใบไม้", "olive จุดโดนแดด", "sunlit warmth", "sunlit greens"] },
+    { "key": "guard",      "aliases": ["กันเหลือง", "คุมไม่ให้เหลือง", "avoid yellow", "yellow guard"] },
+    { "key": "haze",       "aliases": ["หมอก", "หมอกฉากหลัง", "haze", "atmospheric haze"] },
+    { "key": "reach",      "aliases": ["ระยะหมอก", "haze reach"],
+      "special": { "สั้น": 20, "short": 20, "กลาง": 45, "medium": 45, "ยาว": 70, "long": 70, "ทั้งภาพ": 100, "full": 100 } },
+    { "key": "hazeTemp",   "aliases": ["โทนหมอก", "haze tone"],
+      "positive": ["อุ่น", "warm"], "negative": ["เย็น", "cool"] },
+    { "key": "fade",       "aliases": ["ฟิล์มจาง", "ยกเงาดำ", "faded film", "fade"] },
+    { "key": "grain",      "aliases": ["เกรนฟิล์ม", "เกรน", "film grain", "grain"] },
+    { "key": "vignette",   "aliases": ["ขอบมืด", "vignette"] }
+  ],
+
+  "tints": [
+    { "hueKey": "shHue", "satKey": "shSat", "aliases": ["สีเงา", "โทนเงา", "shadow tint", "shadow color"] },
+    { "hueKey": "hiHue", "satKey": "hiSat", "aliases": ["สีไฮไลต์", "โทนไฮไลต์", "highlight tint", "highlight color"] }
+  ],
+
+  "bands": [
+    { "id": "R", "aliases": ["สีแดง", "แดง", "reds", "red"] },
+    { "id": "Y", "aliases": ["สีเหลืองส้ม", "เหลืองส้ม", "สีเหลือง", "เหลือง", "สีส้ม", "ส้ม", "yellows", "oranges", "yellow", "orange"] },
+    { "id": "G", "aliases": ["สีเขียว", "เขียว", "greens", "green"] },
+    { "id": "A", "aliases": ["สีเขียวอมฟ้า", "เขียวอมฟ้า", "aquas", "cyans", "aqua", "cyan"] },
+    { "id": "B", "aliases": ["สีน้ำเงิน", "น้ำเงิน", "ท้องฟ้า", "ฟ้า", "blues", "blue", "sky"] },
+    { "id": "P", "aliases": ["สีม่วง", "ม่วง", "ลาเวนเดอร์", "purples", "purple", "lavender"] }
+  ],
+  "bandAttributes": [
+    { "prefix": "s", "aliases": ["ความอิ่ม", "อิ่ม", "saturation", "sat"] },
+    { "prefix": "l", "aliases": ["ความสว่าง", "สว่าง", "luminance", "lum"] },
+    { "prefix": "h", "aliases": ["เฉดสี", "เฉด", "hue"] }
+  ],
+
+  "sections": {
+    "notes": ["หมายเหตุ", "notes", "note"],
+    "preserve": ["ห้ามเปลี่ยน", "สิ่งที่ต้องคงไว้", "preserve", "keep"]
+  },
+  "meta": {
+    "name": ["ชื่อ", "name"],
+    "tags": ["แท็ก", "tags"],
+    "version": ["รุ่นรูปแบบ", "format"]
+  }
+}

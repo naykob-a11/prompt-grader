@@ -1,0 +1,48 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install*)",
+      "Bash(pnpm lint*)",
+      "Bash(pnpm typecheck*)",
+      "Bash(pnpm test*)",
+      "Bash(pnpm build*)",
+      "Bash(pnpm preview*)",
+      "Bash(pnpm dev*)",
+      "Bash(pnpm golden:diff*)",
+      "Bash(pnpm --filter engine *)",
+      "Bash(pnpm --filter web *)",
+      "Bash(node --test reference/*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "PowerShell(pnpm install*)",
+      "PowerShell(pnpm lint*)",
+      "PowerShell(pnpm typecheck*)",
+      "PowerShell(pnpm test*)",
+      "PowerShell(pnpm build*)",
+      "PowerShell(pnpm preview*)",
+      "PowerShell(pnpm dev*)",
+      "PowerShell(pnpm golden:diff*)",
+      "PowerShell(pnpm --filter engine *)",
+      "PowerShell(pnpm --filter web *)",
+      "PowerShell(node --test reference/*)",
+      "PowerShell(git status*)",
+      "PowerShell(git diff*)",
+      "PowerShell(git log*)"
+    ],
+    "ask": [
+      "Bash(pnpm golden:update*)",
+      "Bash(git push*)",
+      "Bash(git tag*)",
+      "PowerShell(pnpm golden:update*)",
+      "PowerShell(git push*)",
+      "PowerShell(git tag*)"
+    ],
+    "deny": [
+      "Edit(./reference/prototype-v3.html)",
+      "Bash(rm -rf*)",
+      "PowerShell(rm -rf*)",
+      "PowerShell(Remove-Item -Recurse*)"
+    ]
+  }
+}

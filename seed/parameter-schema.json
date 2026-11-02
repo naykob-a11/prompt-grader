@@ -1,0 +1,410 @@
+{
+  "version": 1,
+  "schemaVersion": 3,
+  "groups": [
+    {
+      "group": "ความเข้มรวม",
+      "subtitle": "",
+      "params": [
+        {
+          "key": "amount",
+          "label": "ความเข้มรวม",
+          "min": 0,
+          "max": 100,
+          "default": 100,
+          "since": 2
+        }
+      ]
+    },
+    {
+      "group": "แสงและสีรวม",
+      "subtitle": "ทั้งภาพ",
+      "params": [
+        {
+          "key": "exposure",
+          "label": "ความสว่าง (EV)",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "contrast",
+          "label": "คอนทราสต์",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "highlights",
+          "label": "ไฮไลต์",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "shadows",
+          "label": "เงา (ลบ = ลึกขึ้น)",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "saturation",
+          "label": "ความอิ่มสี",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "vibrance",
+          "label": "Vibrance",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "temp",
+          "label": "อุณหภูมิสี (เย็น ↔ อุ่น)",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "tint",
+          "label": "Tint (เขียว ↔ ม่วงแดง)",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        }
+      ]
+    },
+    {
+      "group": "แก้สีและรายละเอียด",
+      "subtitle": "สีเพี้ยน ความมัว ความคม จุดรบกวน",
+      "params": [
+        {
+          "key": "castFix",
+          "label": "แก้สีเพี้ยนอัตโนมัติ",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 3
+        },
+        {
+          "key": "dehaze",
+          "label": "ลดความมัว",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 3
+        },
+        {
+          "key": "sharpen",
+          "label": "ความคมชัด",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 3
+        },
+        {
+          "key": "denoise",
+          "label": "ลดจุดรบกวน (คงผิว)",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 3
+        }
+      ]
+    },
+    {
+      "group": "ใบไม้และทุ่งหญ้า",
+      "subtitle": "เฉพาะโทนเขียว",
+      "params": [
+        {
+          "key": "teal",
+          "label": "ดึงเขียวไปทาง teal",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 1
+        },
+        {
+          "key": "forest",
+          "label": "ความลึกของเขียวป่า",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 1
+        },
+        {
+          "key": "sun",
+          "label": "olive/ทองอ่อนในจุดโดนแดด",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 1
+        }
+      ]
+    },
+    {
+      "group": "Split toning",
+      "subtitle": "สีในเงาและไฮไลต์",
+      "params": [
+        {
+          "key": "shHue",
+          "label": "สีของเงา",
+          "min": 0,
+          "max": 360,
+          "default": 200,
+          "kind": "hue",
+          "since": 2
+        },
+        {
+          "key": "shSat",
+          "label": "ความเข้มสีในเงา",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "hiHue",
+          "label": "สีของไฮไลต์",
+          "min": 0,
+          "max": 360,
+          "default": 40,
+          "kind": "hue",
+          "since": 2
+        },
+        {
+          "key": "hiSat",
+          "label": "ความเข้มสีในไฮไลต์",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "guard",
+          "label": "คุมไม่ให้ภาพเหลือง/อำพัน",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 1
+        }
+      ]
+    },
+    {
+      "group": "บรรยากาศและฟิล์ม",
+      "subtitle": "หมอก เกรน ขอบมืด",
+      "params": [
+        {
+          "key": "haze",
+          "label": "หมอกฉากหลัง",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 1
+        },
+        {
+          "key": "reach",
+          "label": "ระยะหมอกจากขอบบน",
+          "min": 0,
+          "max": 100,
+          "default": 45,
+          "since": 1
+        },
+        {
+          "key": "hazeTemp",
+          "label": "โทนหมอก (เย็น ↔ อุ่น)",
+          "min": -100,
+          "max": 100,
+          "default": -30,
+          "since": 2
+        },
+        {
+          "key": "fade",
+          "label": "ฟิล์มจาง (ยกเงาดำ)",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 1
+        },
+        {
+          "key": "grain",
+          "label": "เกรนฟิล์ม",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 1
+        },
+        {
+          "key": "vignette",
+          "label": "ขอบมืด",
+          "min": 0,
+          "max": 100,
+          "default": 0,
+          "since": 1
+        }
+      ]
+    },
+    {
+      "group": "ปรับรายสี (HSL)",
+      "subtitle": "แดง เหลือง เขียว ฟ้า น้ำเงิน ม่วง",
+      "params": [
+        {
+          "key": "hR",
+          "label": "แดง · Hue",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "sR",
+          "label": "แดง · Sat",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "lR",
+          "label": "แดง · Lum",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "hY",
+          "label": "เหลือง/ส้ม · Hue",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "sY",
+          "label": "เหลือง/ส้ม · Sat",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "lY",
+          "label": "เหลือง/ส้ม · Lum",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "hG",
+          "label": "เขียว · Hue",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "sG",
+          "label": "เขียว · Sat",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "lG",
+          "label": "เขียว · Lum",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "hA",
+          "label": "ฟ้าอมเขียว · Hue",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "sA",
+          "label": "ฟ้าอมเขียว · Sat",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "lA",
+          "label": "ฟ้าอมเขียว · Lum",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "hB",
+          "label": "น้ำเงิน/ท้องฟ้า · Hue",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "sB",
+          "label": "น้ำเงิน/ท้องฟ้า · Sat",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "lB",
+          "label": "น้ำเงิน/ท้องฟ้า · Lum",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 2
+        },
+        {
+          "key": "hP",
+          "label": "ม่วง/ลาเวนเดอร์ · Hue",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 3
+        },
+        {
+          "key": "sP",
+          "label": "ม่วง/ลาเวนเดอร์ · Sat",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 3
+        },
+        {
+          "key": "lP",
+          "label": "ม่วง/ลาเวนเดอร์ · Lum",
+          "min": -100,
+          "max": 100,
+          "default": 0,
+          "since": 3
+        }
+      ]
+    }
+  ]
+}

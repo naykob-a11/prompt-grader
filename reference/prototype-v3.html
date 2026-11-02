@@ -1,0 +1,572 @@
+<title>เกรดสีทุ่งเขียว</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: editor workspace — prompt library | image stage | grading controls; collapses to stage → library → controls */
+:root{
+  --bg:#eef1ef; --panel:#f8faf9; --line:#d5ddda; --fg:#1b2422; --muted:#5d6b67;
+  --accent:#1f7d74; --accent-ink:#ffffff; --accent-soft:#dcebe8; --stage:#dfe5e2; --danger:#b3412f;
+  --display:"Anuphan","IBM Plex Sans Thai",system-ui,sans-serif;
+  --body:"IBM Plex Sans Thai",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101615; --panel:#161e1c; --line:#26312e; --fg:#e4ebe8; --muted:#8fa09b;
+  --accent:#4fb3a8; --accent-ink:#071211; --accent-soft:#1c3330; --stage:#0b100f; --danger:#e07a66; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101615; --panel:#161e1c; --line:#26312e; --fg:#e4ebe8; --muted:#8fa09b;
+  --accent:#4fb3a8; --accent-ink:#071211; --accent-soft:#1c3330; --stage:#0b100f; --danger:#e07a66; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.55;margin:0}
+.wrap{min-height:100%;display:flex;flex-direction:column;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 24px;gap:14px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.swatch{display:flex;border-radius:4px;overflow:hidden;flex:none}
+.swatch i{width:10px;height:26px;display:block}
+h1{font-family:var(--display);font-weight:600;font-size:1.35rem;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:600;font-size:1rem;margin:0}
+.sub{color:var(--muted);font-size:.85rem;margin:0}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+button,.btn{font:inherit;font-size:.88rem;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:7px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;position:relative}
+button:hover,.btn:hover{border-color:var(--accent)}
+button:focus-visible,.btn:focus-within,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.small{padding:4px 9px;font-size:.8rem}
+button.danger{color:var(--danger)}
+button:disabled{opacity:.5;cursor:default}
+.btn input{position:absolute;width:1px;height:1px;opacity:0}
+.main{display:grid;grid-template-columns:270px minmax(0,1fr) 330px;grid-template-areas:"lib stage ctl";gap:16px;align-items:start}
+@media (max-width:1200px){.main{grid-template-columns:minmax(0,1fr) 330px;grid-template-areas:"stage ctl" "lib ctl"}}
+@media (max-width:820px){.main{grid-template-columns:minmax(0,1fr);grid-template-areas:"stage" "lib" "ctl"}}
+.stagecol{grid-area:stage;display:flex;flex-direction:column;gap:10px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+#lib{grid-area:lib}#ctl{grid-area:ctl}
+.stage{position:relative;background:var(--stage);border-radius:10px;display:flex;align-items:center;justify-content:center;min-height:260px;overflow:hidden;touch-action:none;user-select:none}
+.stage.drag{outline:2px dashed var(--accent);outline-offset:-6px}
+.frame{position:relative;max-width:100%;line-height:0}
+.frame canvas{display:block;max-width:100%;height:auto;max-height:70vh}
+#before{position:absolute;inset:0;width:100%;height:100%}
+.divider{position:absolute;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.25);transform:translateX(-1px);pointer-events:none}
+.knob{position:absolute;top:50%;left:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#24302d;font-size:13px}
+.tag{position:absolute;top:10px;font-size:.72rem;letter-spacing:.06em;padding:3px 8px;border-radius:4px;background:rgba(10,16,15,.62);color:#f2f5f4;pointer-events:none;line-height:1.4}
+.tag.l{left:10px}.tag.r{right:10px}
+.meta{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 14px;color:var(--muted);font-size:.82rem}
+.meta b{color:var(--fg);font-weight:500}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:5px 11px;font-size:.8rem;background:transparent}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.status{font-size:.82rem;color:var(--muted);min-height:1.2em;margin:0}
+/* library */
+.libhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.item{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;cursor:pointer;background:var(--bg)}
+.item:hover{border-color:var(--accent)}
+.item[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.item .nm{font-weight:600;font-size:.88rem;overflow-wrap:anywhere}
+.item .tx{color:var(--muted);font-size:.78rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.item .ops{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.badge{font-size:.7rem;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px}
+.empty{color:var(--muted);font-size:.82rem;border:1px dashed var(--line);border-radius:8px;padding:10px}
+.sec-label{font-size:.75rem;letter-spacing:.06em;color:var(--muted);margin:4px 0 0}
+/* editor */
+label.f{font-size:.84rem;font-weight:500;display:flex;flex-direction:column;gap:4px}
+input[type=text],textarea{font:inherit;font-size:.88rem;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+textarea{min-height:120px;resize:vertical;line-height:1.5}
+.chk{display:flex;gap:8px;align-items:center;font-size:.8rem;color:var(--muted)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+.notebox{font-size:.82rem;background:var(--accent-soft);border-radius:8px;padding:8px 10px;margin:0}
+/* sliders */
+details{border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:.92rem;list-style-position:inside}
+summary small{font-family:var(--body);font-weight:400;color:var(--muted);font-size:.75rem;margin-left:4px}
+.sl{display:flex;flex-direction:column;gap:7px;margin-top:8px}
+.row{display:grid;grid-template-columns:1fr auto;gap:0 10px;align-items:center}
+.row label{font-size:.83rem}
+.row output{font-family:var(--mono);font-size:.76rem;color:var(--muted);font-variant-numeric:tabular-nums;min-width:4ch;text-align:right}
+input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--accent);margin:0;height:20px}
+input.hue{-webkit-appearance:none;appearance:none;height:10px;border-radius:5px;margin:5px 0;background:linear-gradient(90deg,#f33,#fb3,#9e3,#3e8,#3dd,#38f,#93f,#f3c,#f33)}
+input.hue::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid #333}
+input.hue::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #333}
+.note{font-size:.76rem;color:var(--muted);margin:0}
+.overlay{position:fixed;inset:0;background:rgba(5,9,8,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:20}
+.overlay img{max-width:100%;max-height:78vh;border-radius:6px}
+.overlay p{color:#e8eeec;margin:0;text-align:center;max-width:46ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="swatch" aria-hidden="true"><i style="background:#173c3a"></i><i style="background:#2f6b5c"></i><i style="background:#6f8a4f"></i><i style="background:#e6d6b5"></i></div>
+      <div>
+        <h1>เกรดสีทุ่งเขียว</h1>
+        <p class="sub">เลือกหรือเขียนพร้อมต์ แล้วปรับโทนภาพตามนั้น องค์ประกอบภาพคงเดิมทุกพิกเซล</p>
+      </div>
+    </div>
+    <div class="actions">
+      <label class="btn" for="file">เปิดภาพ<input id="file" type="file" accept="image/*"></label>
+      <button id="dl" class="primary" type="button">บันทึกภาพความละเอียดเต็ม</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="stagecol">
+      <div class="stage" id="stage">
+        <div class="frame" id="frame">
+          <canvas id="after" aria-label="ภาพหลังปรับโทน"></canvas>
+          <canvas id="before" aria-label="ภาพต้นฉบับ"></canvas>
+          <div class="divider" id="divider"><div class="knob">⇆</div></div>
+          <span class="tag l" id="tagL">ก่อน</span><span class="tag r" id="tagR">หลัง</span>
+        </div>
+      </div>
+      <div class="meta">
+        <span id="info"><b>ภาพตัวอย่าง</b> · ลากภาพมาวาง วางด้วย Ctrl+V หรือกด “เปิดภาพ”</span>
+        <span class="seg" role="group" aria-label="โหมดแสดงผล">
+          <button type="button" id="mSplit" aria-pressed="true">เทียบก่อน/หลัง</button>
+          <button type="button" id="mAfter" aria-pressed="false">หลังปรับ</button>
+          <button type="button" id="mBefore" aria-pressed="false">ต้นฉบับ</button>
+        </span>
+      </div>
+      <p class="status" id="status" role="status"></p>
+    </div>
+
+    <section class="panel" id="lib" aria-labelledby="libTitle">
+      <div class="libhead"><h2 id="libTitle">คลังพร้อมต์</h2><button type="button" class="small" id="newBtn">+ พร้อมต์ใหม่</button></div>
+      <p class="sec-label">พร้อมต์ของฉัน</p>
+      <ul class="list" id="mine"><li class="empty" id="mineEmpty">กำลังโหลดพร้อมต์ที่บันทึกไว้…</li></ul>
+      <p class="sec-label">ตัวอย่างในตัว</p>
+      <ul class="list" id="builtin"></ul>
+      <div class="btnrow">
+        <button type="button" class="small" id="exportBtn">ส่งออกคลัง (.json)</button>
+        <label class="btn small" for="importFile" style="padding:4px 9px;font-size:.8rem">นำเข้า<input id="importFile" type="file" accept=".json,application/json"></label>
+      </div>
+      <p class="note" id="storeNote"></p>
+    </section>
+
+    <section class="panel" id="ctl" aria-labelledby="edTitle">
+      <h2 id="edTitle">พร้อมต์ที่ใช้อยู่</h2>
+      <label class="f" for="pName">ชื่อ<input type="text" id="pName" maxlength="80" placeholder="เช่น หมอกเช้าดอยอินทนนท์"></label>
+      <label class="f" for="pText">ข้อความพร้อมต์<textarea id="pText" placeholder="อธิบายโทนสีที่ต้องการ เป็นภาษาไทยหรืออังกฤษก็ได้"></textarea></label>
+      <label class="chk" for="sendImg" id="sendImgRow"><input type="checkbox" id="sendImg" checked> ส่งภาพย่อให้ Claude ดูประกอบ</label>
+      <div class="btnrow">
+        <button type="button" class="primary" id="convertBtn">แปลงพร้อมต์เป็นค่าปรับ</button>
+        <button type="button" id="saveBtn">บันทึก</button>
+        <button type="button" id="saveNewBtn">บันทึกเป็นพร้อมต์ใหม่</button>
+      </div>
+      <p class="status" id="edStatus" role="status"></p>
+      <p class="notebox" id="aiNote" hidden></p>
+      <div class="row"><label for="amount" style="font-weight:600">ความเข้มรวม</label><output id="o_amount"></output><input type="range" id="amount" min="0" max="100"></div>
+      <div id="groups"></div>
+      <div class="btnrow"><button type="button" class="small" id="resetBtn">ล้างค่าเป็นกลาง</button></div>
+      <p class="note">ปรับได้เฉพาะสี แสง หมอก เกรน และขอบมืด สิ่งที่พร้อมต์ขอแต่เครื่องมือทำไม่ได้ เช่น เพิ่มวัตถุหรือเปลี่ยนทิศแสง จะถูกระบุในกล่องคำอธิบาย ภาพประมวลผลในเบราว์เซอร์ของคุณ</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+// ================= parameter schema =================
+const SCHEMA=[
+  {t:"แสงและสีรวม",s:"ทั้งภาพ",open:true,items:[
+    ["exposure","ความสว่าง (EV)",-100,100,0],["contrast","คอนทราสต์",-100,100,0],["highlights","ไฮไลต์",-100,100,0],["shadows","เงา (ลบ = ลึกขึ้น)",-100,100,0],
+    ["saturation","ความอิ่มสี",-100,100,0],["vibrance","Vibrance",-100,100,0],["temp","อุณหภูมิสี (เย็น ↔ อุ่น)",-100,100,0],["tint","Tint (เขียว ↔ ม่วงแดง)",-100,100,0]]},
+  {t:"แก้สีและรายละเอียด",s:"สีเพี้ยน ความมัว ความคม จุดรบกวน",open:false,items:[
+    ["castFix","แก้สีเพี้ยนอัตโนมัติ",0,100,0],["dehaze","ลดความมัว",0,100,0],["sharpen","ความคมชัด",0,100,0],["denoise","ลดจุดรบกวน (คงผิว)",0,100,0]]},
+  {t:"ใบไม้และทุ่งหญ้า",s:"เฉพาะโทนเขียว",open:true,items:[
+    ["teal","ดึงเขียวไปทาง teal",0,100,0],["forest","ความลึกของเขียวป่า",0,100,0],["sun","olive/ทองอ่อนในจุดโดนแดด",0,100,0]]},
+  {t:"Split toning",s:"สีในเงาและไฮไลต์",open:true,items:[
+    ["shHue","สีของเงา",0,360,200,"hue"],["shSat","ความเข้มสีในเงา",0,100,0],["hiHue","สีของไฮไลต์",0,360,40,"hue"],["hiSat","ความเข้มสีในไฮไลต์",0,100,0],
+    ["guard","คุมไม่ให้ภาพเหลือง/อำพัน",0,100,0]]},
+  {t:"บรรยากาศและฟิล์ม",s:"หมอก เกรน ขอบมืด",open:false,items:[
+    ["haze","หมอกฉากหลัง",0,100,0],["reach","ระยะหมอกจากขอบบน",0,100,45],["hazeTemp","โทนหมอก (เย็น ↔ อุ่น)",-100,100,-30],
+    ["fade","ฟิล์มจาง (ยกเงาดำ)",0,100,0],["grain","เกรนฟิล์ม",0,100,0],["vignette","ขอบมืด",0,100,0]]},
+  {t:"ปรับรายสี (HSL)",s:"แดง เหลือง เขียว ฟ้า น้ำเงิน ม่วง",open:false,items:[
+    ["hR","แดง · Hue",-100,100,0],["sR","แดง · Sat",-100,100,0],["lR","แดง · Lum",-100,100,0],
+    ["hY","เหลือง/ส้ม · Hue",-100,100,0],["sY","เหลือง/ส้ม · Sat",-100,100,0],["lY","เหลือง/ส้ม · Lum",-100,100,0],
+    ["hG","เขียว · Hue",-100,100,0],["sG","เขียว · Sat",-100,100,0],["lG","เขียว · Lum",-100,100,0],
+    ["hA","ฟ้าอมเขียว · Hue",-100,100,0],["sA","ฟ้าอมเขียว · Sat",-100,100,0],["lA","ฟ้าอมเขียว · Lum",-100,100,0],
+    ["hB","น้ำเงิน/ท้องฟ้า · Hue",-100,100,0],["sB","น้ำเงิน/ท้องฟ้า · Sat",-100,100,0],["lB","น้ำเงิน/ท้องฟ้า · Lum",-100,100,0],
+    ["hP","ม่วง/ลาเวนเดอร์ · Hue",-100,100,0],["sP","ม่วง/ลาเวนเดอร์ · Sat",-100,100,0],["lP","ม่วง/ลาเวนเดอร์ · Lum",-100,100,0]]}
+];
+const DEF={amount:100}; const RANGE={amount:[0,100]};
+SCHEMA.forEach(g=>g.items.forEach(([k,,mn,mx,d])=>{DEF[k]=d;RANGE[k]=[mn,mx];}));
+const KEYS=Object.keys(DEF);
+function clean(p){const o={};KEYS.forEach(k=>{let v=Number(p&&p[k]);if(!isFinite(v))v=DEF[k];o[k]=Math.round(Math.min(RANGE[k][1],Math.max(RANGE[k][0],v)));});return o;}
+const mk=o=>clean(Object.assign({},DEF,o));
+
+const ORIGINAL="A natural, cinematic photograph based on the landscape, balancing cool cinematic tones with a very subtle, restrained touch of warmth. The lush fields are primarily graded with a deep, cinematic teal-green and forest green. Introduce only a very slight, natural hint of warm olive and soft golden-green strictly in the sunlit patches, carefully avoiding any heavy yellow, orange, or amber color casts over the entire image. The lighting is soft and natural, resembling gentle afternoon light rather than a heavy golden hour. The highlights on the riverbanks, paths, and upper foliage have a faint, delicate warm cream tone. A gentle atmospheric haze softens the distant background with a neutral, slightly cool desaturated tone. The shadows remain deep and rich, retaining a subtle cool dark-teal undertone to provide beautiful color contrast against the delicate warm highlights, ensuring the overall image does not look overly yellow. The foreground remains grounded with a low-contrast organic film texture and a gentle vignette darkening the edges. No new elements, heavy fog overlays, or structures are added. Camera perspective, composition, and all physical elements remain completely unchanged.";
+const ORIGINAL_P=mk({contrast:5,shadows:-35,saturation:-5,teal:60,forest:45,sun:30,shHue:188,shSat:45,hiHue:40,hiSat:30,guard:65,haze:35,reach:45,hazeTemp:-30,fade:25,grain:30,vignette:40});
+const BUILTIN=[
+  {id:"b1",name:"ทุ่งเขียว Cinematic",text:ORIGINAL,params:ORIGINAL_P},
+  {id:"b2",name:"หมอกเช้าบนดอย",text:"Cool early-morning mountain light. Soft bluish mist rising from the valleys, lifted shadows, gentle low contrast, muted greens leaning toward sage, pale cool highlights. Calm and quiet, no warm cast.",
+    params:mk({exposure:8,contrast:-25,highlights:-10,shadows:25,saturation:-20,temp:-25,tint:5,teal:30,shHue:205,shSat:30,hiHue:210,hiSat:12,haze:60,reach:60,hazeTemp:-55,fade:30,grain:15,vignette:15,sG:-20})},
+  {id:"b3",name:"ฟิล์มอุ่นวินเทจ",text:"Warm nostalgic analog film look. Faded blacks, creamy orange-tinted highlights, slightly green shadows, softened saturation, visible fine grain and a soft vignette, like a 1970s travel photograph.",
+    params:mk({contrast:-10,highlights:-15,shadows:10,saturation:-15,temp:25,shHue:140,shSat:25,hiHue:32,hiSat:45,fade:55,grain:55,vignette:45,hY:-10,sB:-25})},
+  {id:"b4",name:"Teal & Orange",text:"Classic blockbuster teal-and-orange grade. Shadows and skies pushed toward teal, warm orange highlights and skin tones, punchy contrast, rich but controlled saturation.",
+    params:mk({contrast:30,shadows:-20,vibrance:20,shHue:190,shSat:55,hiHue:30,hiSat:45,teal:35,hB:-25,sB:15,hA:-15,hY:-10,sY:15,vignette:30})},
+  {id:"b6",name:"พอร์ตเทรตเด็กสดใส",text:"Bright, clean, soft and cheerful professional children's portrait. Correct underexposure and uneven light, lift shadows gently, keep highlights and skin detail. Correct green/yellow color cast, fresh pastel colors, enhance lavender and purple costume tones, natural healthy skin, clean neutral background, balanced saturation and contrast. Improve clarity and fine detail around eyes, hair and textures, reduce mild haze, subtle noise reduction keeping natural skin texture. No HDR look, no plastic skin.",
+    params:mk({exposure:22,contrast:-5,highlights:-15,shadows:30,vibrance:12,saturation:-4,tint:6,temp:-4,castFix:70,dehaze:20,sharpen:35,denoise:25,guard:30,hiHue:330,hiSat:8,sY:-15,sG:-25,hP:-5,sP:25,lP:10,lR:4})},
+  {id:"b5",name:"ขาวดำคอนทราสต์สูง",text:"High-contrast black-and-white landscape. Deep blacks, bright clean highlights, darker sky, film grain and a strong vignette.",
+    params:mk({contrast:45,highlights:10,shadows:-30,saturation:-100,lB:-45,lG:10,grain:40,vignette:50})}
+];
+
+// ================= grading engine =================
+const sm=(a,b,x)=>{x=(x-a)/(b-a);x=x<0?0:x>1?1:x;return x*x*(3-2*x)};
+function hash(x,y){let h=Math.imul(x,374761393)^Math.imul(y,668265263);h=Math.imul(h^(h>>>13),1274126177);return ((h^(h>>>16))>>>0)/4294967296;}
+function hueOff(deg){const h=((deg%360)+360)%360/60,x=1-Math.abs(h%2-1);let c=h<1?[1,x,0]:h<2?[x,1,0]:h<3?[0,1,x]:h<4?[0,x,1]:h<5?[x,0,1]:[1,0,x];const m=(c[0]+c[1]+c[2])/3;return [c[0]-m,c[1]-m,c[2]-m];}
+function grade(src,dst,w,rows,y0,W,H,q){
+  const A=q.amount/100,ex=Math.pow(2,q.exposure/100),con=q.contrast/100,sat=q.saturation/100,vib=q.vibrance/100,temp=q.temp/100,tint=q.tint/100,
+    hiT=q.highlights/100,shT=q.shadows/100,teal=q.teal/100,forest=q.forest/100,sun=q.sun/100,shC=hueOff(q.shHue),shS=q.shSat/100,hiC=hueOff(q.hiHue),hiS=q.hiSat/100,
+    guard=q.guard/100,haze=q.haze/100,reach=0.15+q.reach/100*0.75,hzT=q.hazeTemp/100,fade=q.fade/100,grain=q.grain/100,vig=q.vignette/100;
+  const B=[[0,q.hR,q.sR,q.lR],[50,q.hY,q.sY,q.lY],[115,q.hG,q.sG,q.lG],[180,q.hA,q.sA,q.lA],[225,q.hB,q.sB,q.lB],[285,q.hP,q.sP,q.lP]].map(b=>[b[0],b[1]/100,b[2]/100,b[3]/100]).filter(b=>b[1]||b[2]||b[3]);
+  const cf=q.castFix/100,wr=(1+temp*0.12+tint*0.03)*(1+(WBG[0]-1)*cf),wg=(1-tint*0.08)*(1+(WBG[1]-1)*cf),wb=(1-temp*0.12+tint*0.03)*(1+(WBG[2]-1)*cf);
+  const dz=q.dehaze/100*0.18,dzA=0.8,dzK=1/(1-dz);
+  const cx=W/2,cy=H/2,inv=1/Math.sqrt(cx*cx+cy*cy);
+  for(let j=0;j<rows;j++){
+    const y=y0+j;let hz=1-(y/H)/reach;hz=hz>0?Math.pow(hz,1.5)*haze*0.6:0;const dy=y-cy;
+    for(let x=0;x<w;x++){
+      const i=(j*w+x)*4,r0=src[i]/255,g0=src[i+1]/255,b0=src[i+2]/255;
+      let r=Math.min(1,r0*ex*wr),g=Math.min(1,g0*ex*wg),b=Math.min(1,b0*ex*wb);
+      if(dz>0){r=Math.max(0,(r-dz*dzA)*dzK);g=Math.max(0,(g-dz*dzA)*dzK);b=Math.max(0,(b-dz*dzA)*dzK);r=r>1?1:r;g=g>1?1:g;b=b>1?1:b;}
+      const L0=0.2126*r+0.7152*g+0.0722*b;
+      let mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,h=0,s=mx?d/mx:0,v=mx;
+      if(d>1e-5){if(mx===r)h=((g-b)/d)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h*=60;if(h<0)h+=360;}
+      const cw=Math.min(1,s*4);let dh=0,ds=0,dl=0;
+      for(let k=0;k<B.length;k++){let ad=Math.abs(h-B[k][0]);if(ad>180)ad=360-ad;const wt=ad<45?(1-ad/45)*cw:0;if(wt){dh+=wt*B[k][1]*30;ds+=wt*B[k][2];dl+=wt*B[k][3];}}
+      let fw=0;if(h>45&&h<190){fw=h<80?sm(45,80,h):h>150?1-sm(150,190,h):1;}fw*=Math.min(1,s*3.2);
+      const lit=sm(0.42,0.82,L0);
+      if(fw>0)dh+=fw*((1-lit)*teal*34-lit*sun*(h>80?Math.min(28,(h-72)*0.55):0));
+      h+=dh;h=((h%360)+360)%360;
+      s*=(1+ds)*(1-fw*0.10*teal*(1-lit))*(1+fw*0.06*sun*lit);
+      s=vib>=0?s+vib*s*(1-s)*1.5:s*(1+vib*(1-s*0.5));
+      s=s<0?0:s>1?1:s;
+      v*=(1+dl*0.35)*(1-fw*forest*0.22*(1-L0)*(1-lit*0.6));v=v<0?0:v>1?1:v;
+      const c=v*s,hp=h/60,xx=c*(1-Math.abs(hp%2-1)),m=v-c;
+      if(hp<1){r=c;g=xx;b=0}else if(hp<2){r=xx;g=c;b=0}else if(hp<3){r=0;g=c;b=xx}else if(hp<4){r=0;g=xx;b=c}else if(hp<5){r=xx;g=0;b=c}else{r=c;g=0;b=xx}
+      r+=m;g+=m;b+=m;
+      if(sat){const Ls=0.2126*r+0.7152*g+0.0722*b,f=1+sat;r=Ls+(r-Ls)*f;g=Ls+(g-Ls)*f;b=Ls+(b-Ls)*f;}
+      // tone on luminance
+      const L=0.2126*r+0.7152*g+0.0722*b;let Ln=L;
+      Ln+=hiT*0.2*sm(0.5,1,L);
+      Ln+=shT*0.25*(1-L)*(1-L)*(1-sm(0.4,0.75,L));
+      const t=Ln-0.5;Ln=0.5+t*(1+con*0.7*(1-4*t*t));Ln=Ln<0?0:Ln>1.05?1.05:Ln;
+      if(L>1e-4){const k=Ln/L;r*=k;g*=k;b*=k;}else{r=g=b=Ln;}
+      // split toning
+      const sw=(1-Ln)*(1-Ln)*(1-sm(0.5,0.8,Ln)),hw=sm(0.55,0.98,Ln);
+      r+=shC[0]*shS*0.16*sw+hiC[0]*hiS*0.13*hw;g+=shC[1]*shS*0.16*sw+hiC[1]*hiS*0.13*hw;b+=shC[2]*shS*0.16*sw+hiC[2]*hiS*0.13*hw;
+      // yellow guard
+      if(guard>0){const yel=Math.min(r,g)-b-0.10;if(yel>0){const f=yel*guard*0.55*sm(0.25,0.7,Ln);r-=f*0.9;g-=f*0.55;b+=f*0.25;}}
+      // haze
+      if(hz>0){const L3=0.2126*r+0.7152*g+0.0722*b,tg=0.55+L3*0.35;r+=(tg+hzT*0.04-r)*hz;g+=(tg-g)*hz;b+=(tg-hzT*0.05-b)*hz;}
+      // fade
+      if(fade>0){const fl=fade*0.07;r=fl+r*(1-fl*1.1);g=fl+g*(1-fl*1.1);b=fl+b*(1-fl*1.1);}
+      if(vig>0){const dx=x-cx,dd=Math.sqrt(dx*dx+dy*dy)*inv,vf=1-vig*0.5*sm(0.38,1.05,dd);r*=vf;g*=vf;b*=vf;}
+      if(grain>0){const L4=0.2126*r+0.7152*g+0.0722*b,n=(hash(x,y)+hash(x+1,y+7)-1)*grain*0.075*(1-Math.min(1,Math.abs(L4-0.45)*1.4));r+=n;g+=n;b+=n;}
+      dst[i]=255*(r0+(r-r0)*A);dst[i+1]=255*(g0+(g-g0)*A);dst[i+2]=255*(b0+(b-b0)*A);dst[i+3]=src[i+3];
+    }
+  }
+}
+
+// detail pass: edge-aware denoise + unsharp mask (3x3), in place on rows [from,to)
+let WBG=[1,1,1];
+function detail(data,w,h,q,from,to){
+  const sh=q.sharpen/100,dn=q.denoise/100;if(!sh&&!dn)return;
+  const src=new Float32Array(w*h*3);for(let i=0,j=0;i<w*h;i++,j+=4){src[i*3]=data[j];src[i*3+1]=data[j+1];src[i*3+2]=data[j+2];}
+  for(let y=from;y<to;y++){const y0=y>0?y-1:0,y1=y<h-1?y+1:h-1;
+    for(let x=0;x<w;x++){const x0=x>0?x-1:0,x1=x<w-1?x+1:w-1,o=(y*w+x)*4,c=(y*w+x)*3;
+      let br=0,bg=0,bb=0;const ys=[y0,y,y1],xs=[x0,x,x1];
+      for(let a=0;a<3;a++)for(let b=0;b<3;b++){const k=(ys[a]*w+xs[b])*3;br+=src[k];bg+=src[k+1];bb+=src[k+2];}
+      br/=9;bg/=9;bb/=9;const pr=src[c],pg=src[c+1],pb=src[c+2];
+      const dl=Math.abs(0.2126*(pr-br)+0.7152*(pg-bg)+0.0722*(pb-bb))/255;
+      const wn=dn*0.85*(1-sm(0.015,0.07,dl)),ws=sh*1.6*sm(0.01,0.045,dl);
+      data[o]=pr+(br-pr)*wn+(pr-br)*ws;data[o+1]=pg+(bg-pg)*wn+(pg-bg)*ws;data[o+2]=pb+(bb-pb)*wn+(pb-bb)*ws;}}
+}
+function grayWorld(d){let r=0,g=0,b=0,n=0;for(let i=0;i<d.length;i+=16){const L=(0.2126*d[i]+0.7152*d[i+1]+0.0722*d[i+2])/255;if(L>0.12&&L<0.9){r+=d[i];g+=d[i+1];b+=d[i+2];n++;}}
+  if(!n)return [1,1,1];r/=n;g/=n;b/=n;const m=(r+g+b)/3,cl=v=>Math.min(1.35,Math.max(0.75,v));return [cl(m/r),cl(m/g),cl(m/b)];}
+
+// ================= sliders =================
+let P=Object.assign({},ORIGINAL_P);
+const gEl=document.getElementById('groups');
+SCHEMA.forEach(g=>{
+  const det=document.createElement('details');if(g.open)det.open=true;
+  det.innerHTML='<summary>'+g.t+'<small>'+g.s+'</small></summary>';
+  const box=document.createElement('div');box.className='sl';
+  g.items.forEach(([k,label,mn,mx,,kind])=>{
+    const r=document.createElement('div');r.className='row';
+    r.innerHTML='<label for="'+k+'">'+label+'</label><output id="o_'+k+'"></output><input type="range" id="'+k+'" min="'+mn+'" max="'+mx+'"'+(kind==='hue'?' class="hue"':'')+'>';
+    box.appendChild(r);
+  });
+  det.appendChild(box);gEl.appendChild(det);
+});
+const fmt=(k,v)=>(k==='shHue'||k==='hiHue')?v+'°':(RANGE[k][0]<0&&v>0?'+'+v:String(v));
+function syncUI(){KEYS.forEach(k=>{document.getElementById(k).value=P[k];document.getElementById('o_'+k).textContent=fmt(k,P[k]);});}
+KEYS.forEach(k=>document.getElementById(k).addEventListener('input',e=>{P[k]=+e.target.value;document.getElementById('o_'+k).textContent=fmt(k,P[k]);dirty=true;schedule();}));
+document.getElementById('resetBtn').onclick=()=>{P=Object.assign({},DEF);syncUI();dirty=true;schedule();};
+
+// ================= canvas & rendering =================
+const after=document.getElementById('after'),before=document.getElementById('before');
+const actx=after.getContext('2d'),bctx=before.getContext('2d',{willReadFrequently:true});
+let srcImg=null,srcName='sample',fullW=0,fullH=0,srcData=null,outData=null,pending=false;
+function setSource(img,name){
+  srcImg=img;srcName=name;fullW=img.naturalWidth||img.width;fullH=img.naturalHeight||img.height;
+  const maxSide=window.innerWidth<700?1100:1600,sc=Math.min(1,maxSide/Math.max(fullW,fullH));
+  const w=Math.max(1,Math.round(fullW*sc)),h=Math.max(1,Math.round(fullH*sc));
+  after.width=before.width=w;after.height=before.height=h;
+  bctx.drawImage(img,0,0,w,h);srcData=bctx.getImageData(0,0,w,h);WBG=grayWorld(srcData.data);outData=actx.createImageData(w,h);render();
+}
+function render(){if(!srcData)return;const w=srcData.width,h=srcData.height;let s=srcData.data;
+  if(P.sharpen||P.denoise){s=new Uint8ClampedArray(srcData.data);detail(s,w,h,P,0,h);}
+  grade(s,outData.data,w,h,0,w,h,P);actx.putImageData(outData,0,0);}
+function schedule(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;render();});}
+
+// compare
+const stage=document.getElementById('stage'),divider=document.getElementById('divider'),frame=document.getElementById('frame'),tagL=document.getElementById('tagL'),tagR=document.getElementById('tagR');
+let pos=0.5,mode='split';
+function applyMode(){
+  before.hidden=mode==='after';divider.hidden=mode!=='split';tagL.hidden=mode==='after';tagR.hidden=mode==='before';
+  if(mode==='split'){before.style.clipPath='inset(0 '+((1-pos)*100)+'% 0 0)';divider.style.left=(pos*100)+'%';tagL.textContent='ก่อน';}
+  else{before.style.clipPath='none';tagL.textContent='ต้นฉบับ';}
+  ['split','after','before'].forEach(m=>document.getElementById('m'+m[0].toUpperCase()+m.slice(1)).setAttribute('aria-pressed',String(m===mode)));
+}
+document.getElementById('mSplit').onclick=()=>{mode='split';applyMode()};
+document.getElementById('mAfter').onclick=()=>{mode='after';applyMode()};
+document.getElementById('mBefore').onclick=()=>{mode='before';applyMode()};
+let dragging=false;
+function setPos(e){const r=frame.getBoundingClientRect();pos=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));applyMode();}
+stage.addEventListener('pointerdown',e=>{if(mode!=='split')return;dragging=true;stage.setPointerCapture(e.pointerId);setPos(e);});
+stage.addEventListener('pointermove',e=>{if(dragging)setPos(e)});
+stage.addEventListener('pointerup',()=>dragging=false);stage.addEventListener('pointercancel',()=>dragging=false);
+applyMode();
+
+// image loading
+const status=document.getElementById('status'),info=document.getElementById('info');
+function loadFile(f){
+  if(!f||!/^image\//.test(f.type)){status.textContent='ไฟล์นี้ไม่ใช่ภาพ เลือกไฟล์ JPG, PNG หรือ WebP';return;}
+  const img=new Image();
+  img.onload=()=>{setSource(img,f.name.replace(/\.[^.]+$/,''));info.innerHTML='<b></b> · '+fullW+'×'+fullH+' px';info.querySelector('b').textContent=f.name;status.textContent='';};
+  img.onerror=()=>{status.textContent='เปิดภาพนี้ไม่ได้ ลองบันทึกเป็น JPG แล้วเปิดใหม่';};
+  img.src=URL.createObjectURL(f);
+}
+document.getElementById('file').addEventListener('change',e=>{loadFile(e.target.files[0]);e.target.value='';});
+['dragenter','dragover'].forEach(t=>stage.addEventListener(t,e=>{e.preventDefault();stage.classList.add('drag')}));
+['dragleave','drop'].forEach(t=>stage.addEventListener(t,e=>{e.preventDefault();stage.classList.remove('drag')}));
+stage.addEventListener('drop',e=>{const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)loadFile(f);});
+document.addEventListener('paste',e=>{if(e.target.closest&&e.target.closest('input,textarea'))return;const it=[...(e.clipboardData?.items||[])].find(i=>i.type.startsWith('image/'));if(it)loadFile(it.getAsFile());});
+
+// ================= capabilities =================
+const cap=n=>(window.claude&&window.claude.use?window.claude.use(n).catch(()=>null):Promise.resolve(null));
+let downloads=null,sampleFn=null,imgOK=false;
+cap('downloads').then(d=>downloads=d);
+const convertBtn=document.getElementById('convertBtn'),sendImgRow=document.getElementById('sendImgRow');
+convertBtn.disabled=true;sendImgRow.hidden=true;
+cap('sample').then(async s=>{
+  sampleFn=s;
+  if(!s){convertBtn.hidden=true;edStatus.textContent='มุมมองนี้เรียก Claude ไม่ได้ ปรับแถบเลื่อนเองแล้วบันทึกเป็นพร้อมต์ได้';return;}
+  convertBtn.disabled=false;
+  try{const lim=await s.limits();imgOK=!!lim.images;}catch(e){imgOK=false;}
+  sendImgRow.hidden=!imgOK;
+});
+
+// ================= storage (db per-user, fallback browser) =================
+const mineEl=document.getElementById('mine'),storeNote=document.getElementById('storeNote');
+let store=null,mine=[];
+const LS='kreadsi-prompts';
+function lsRead(){try{return JSON.parse(localStorage.getItem(LS)||'[]')}catch(e){return []}}
+function lsWrite(a){try{localStorage.setItem(LS,JSON.stringify(a));return true}catch(e){return false}}
+function makeLocalStore(){
+  const subs=[];const emit=()=>subs.forEach(f=>f(lsRead()));
+  return {kind:'local',
+    subscribe(f){subs.push(f);f(lsRead());},
+    async add(o){const a=lsRead();const id='l'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);a.unshift(Object.assign({id},o));if(!lsWrite(a))throw new Error('storage');emit();return id;},
+    async update(id,o){const a=lsRead().map(x=>x.id===id?Object.assign({},x,o):x);if(!lsWrite(a))throw new Error('storage');emit();},
+    async remove(id){lsWrite(lsRead().filter(x=>x.id!==id));emit();}};
+}
+(async()=>{
+  const [db,user]=await Promise.all([cap('db'),cap('user')]);
+  let uid=null;if(user){try{uid=await user.id();}catch(e){}}
+  if(db&&uid){
+    const col=db.collection('data/users/'+uid);
+    store={kind:'db',
+      subscribe(f){
+        let t=setTimeout(()=>{storeNote.textContent='ยังเชื่อมต่อคลังไม่ได้ รายการอาจไม่ครบ';},10000);
+        col.orderBy('createdAt','desc').onSnapshot(s=>{if(!s.metadata.fromCache){clearTimeout(t);storeNote.textContent='พร้อมต์ของคุณเก็บไว้ในบัญชี เห็นเฉพาะคุณ';}f(s.docs.map(d=>Object.assign({id:d.id},d.data())));},
+          e=>{clearTimeout(t);storeNote.textContent='โหลดคลังไม่สำเร็จ ลองเปิดหน้านี้ใหม่';});
+      },
+      async add(o){const ref=col.doc();await ref.set(o);return ref.id;},
+      async update(id,o){await col.doc(id).update(o);},
+      async remove(id){await col.doc(id).delete();}};
+  }else{store=makeLocalStore();storeNote.textContent='พร้อมต์เก็บไว้ในเบราว์เซอร์นี้เท่านั้น ใช้ “ส่งออกคลัง” เพื่อสำรองไว้';}
+  store.subscribe(list=>{mine=list;renderLib();});
+})();
+
+// ================= library UI =================
+const builtinEl=document.getElementById('builtin');
+let currentId='b1',dirty=false,confirmDel=null;
+function itemEl(p,builtin){
+  const li=document.createElement('li');li.className='item';li.tabIndex=0;li.setAttribute('aria-current',String(p.id===currentId));
+  const nm=document.createElement('span');nm.className='nm';nm.textContent=p.name||'ไม่มีชื่อ';
+  const tx=document.createElement('span');tx.className='tx';tx.textContent=p.text||'(ไม่มีข้อความพร้อมต์)';
+  li.append(nm,tx);
+  if(!builtin){
+    const ops=document.createElement('div');ops.className='ops';
+    if(confirmDel===p.id){
+      const yes=document.createElement('button');yes.type='button';yes.className='small danger';yes.textContent='ยืนยันลบ';
+      yes.onclick=async e=>{e.stopPropagation();confirmDel=null;try{await store.remove(p.id);if(currentId===p.id)currentId=null;}catch(err){storeNote.textContent='ลบไม่สำเร็จ';}renderLib();};
+      const no=document.createElement('button');no.type='button';no.className='small';no.textContent='ยกเลิก';
+      no.onclick=e=>{e.stopPropagation();confirmDel=null;renderLib();};
+      ops.append(yes,no);
+    }else{
+      const del=document.createElement('button');del.type='button';del.className='small danger';del.textContent='ลบ';
+      del.onclick=e=>{e.stopPropagation();confirmDel=p.id;renderLib();};
+      ops.append(del);
+    }
+    li.append(ops);
+  }
+  const open=()=>selectPrompt(p,builtin);
+  li.addEventListener('click',open);li.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target===li)open();});
+  return li;
+}
+function renderLib(){
+  mineEl.innerHTML='';
+  if(!mine.length){const e=document.createElement('li');e.className='empty';e.textContent='ยังไม่มีพร้อมต์ของคุณ กด “+ พร้อมต์ใหม่” แล้วเขียนพร้อมต์ หรือแก้ตัวอย่างด้านล่างแล้วกด “บันทึกเป็นพร้อมต์ใหม่”';mineEl.append(e);}
+  else mine.forEach(p=>mineEl.append(itemEl(p,false)));
+  builtinEl.innerHTML='';BUILTIN.forEach(p=>builtinEl.append(itemEl(p,true)));
+  const cur=mine.find(x=>x.id===currentId);
+  document.getElementById('saveBtn').disabled=!cur;
+}
+const pName=document.getElementById('pName'),pText=document.getElementById('pText'),aiNote=document.getElementById('aiNote'),edStatus=document.getElementById('edStatus');
+function selectPrompt(p,builtin){
+  currentId=p.id;P=clean(p.params);syncUI();schedule();
+  pName.value=p.name||'';pText.value=p.text||'';
+  aiNote.hidden=!p.note;aiNote.textContent=p.note||'';
+  edStatus.textContent=builtin?'ตัวอย่างในตัวแก้ทับไม่ได้ ปรับแล้วกด “บันทึกเป็นพร้อมต์ใหม่”':'';
+  dirty=false;renderLib();
+}
+document.getElementById('newBtn').onclick=()=>{
+  currentId=null;pName.value='';pText.value='';aiNote.hidden=true;P=Object.assign({},DEF);syncUI();schedule();
+  edStatus.textContent='เขียนพร้อมต์แล้วกด “แปลงพร้อมต์เป็นค่าปรับ”';renderLib();pText.focus();
+};
+function record(){return {name:pName.value.trim()||'พร้อมต์ไม่มีชื่อ',text:pText.value.trim(),params:Object.assign({},P),note:aiNote.hidden?'':aiNote.textContent,updatedAt:Date.now()};}
+document.getElementById('saveNewBtn').onclick=async()=>{
+  if(!store)return;const o=record();o.createdAt=Date.now();
+  try{const id=await store.add(o);currentId=id;edStatus.textContent='บันทึก “'+o.name+'” ลงคลังแล้ว';dirty=false;renderLib();}
+  catch(e){edStatus.textContent=e&&e.code==='quota_exceeded'?'คลังเต็ม ลบพร้อมต์ที่ไม่ใช้ก่อน':'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง';}
+};
+document.getElementById('saveBtn').onclick=async()=>{
+  const cur=mine.find(x=>x.id===currentId);if(!cur||!store)return;const o=record();
+  try{await store.update(cur.id,o);edStatus.textContent='บันทึกทับ “'+o.name+'” แล้ว';dirty=false;}catch(e){edStatus.textContent='บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง';}
+};
+
+// ================= Claude: prompt → parameters =================
+function paramGuide(){
+  const lines=[];lines.push('- amount (0..100): overall strength of the whole grade, default 100.');
+  const desc={exposure:'brightness, ±100 = ±1 stop',contrast:'midtone contrast S-curve',highlights:'brighten (+) or recover (-) highlights',shadows:'lift (+) or deepen/crush (-) shadows',
+    saturation:'global saturation, -100 = black and white',vibrance:'saturation that protects already-saturated colors',temp:'white balance, - cooler/blue, + warmer/amber',tint:'- greener, + magenta',
+    teal:'rotate green foliage hues toward cinematic teal-green in shadows and midtones',forest:'deepen/darken green foliage toward forest green',sun:'add warm olive / soft golden-green ONLY to sunlit (bright) green foliage',
+    shHue:'hue in degrees of the color added to shadows (e.g. 185-200 teal, 220 blue, 140 green, 30 orange)',shSat:'strength of the shadow tint',hiHue:'hue in degrees of the color added to highlights (e.g. 35-45 warm cream, 25-30 orange, 210 cool)',hiSat:'strength of the highlight tint',
+    guard:'suppress yellow/orange/amber casts in midtones and highlights',haze:'atmospheric haze; it is strongest at the TOP of the frame and fades downward (the engine has no depth map)',reach:'how far down from the top the haze extends',hazeTemp:'haze color, - cool bluish, + warm',
+    fade:'faded/lifted blacks, low-contrast film',castFix:'automatic gray-world correction of the photo\'s existing color cast (e.g. unwanted green or yellow); 0 = off',dehaze:'remove mild haze/veiling, adds depth and clarity',sharpen:'edge-aware sharpening of fine detail (eyes, hair, textures); keep subtle, 20-45 is typical',denoise:'edge-aware noise reduction that keeps texture; keep subtle, 15-35 is typical',grain:'film grain',vignette:'darken edges'};
+  SCHEMA.forEach(g=>g.items.forEach(([k,,mn,mx,d])=>{
+    let dsc=desc[k];if(!dsc){const band={R:'reds',Y:'yellows/oranges',G:'greens',A:'aquas/cyans',B:'blues/sky',P:'purples/lavender/violet/magenta'}[k[1]];dsc={h:'hue shift of '+band,s:'saturation of '+band,l:'luminance of '+band}[k[0]];}
+    lines.push('- '+k+' ('+mn+'..'+mx+', neutral '+d+'): '+dsc+'.');
+  }));
+  return lines.join('\n');
+}
+convertBtn.onclick=async()=>{
+  const text=pText.value.trim();
+  if(!text){edStatus.textContent='พิมพ์ข้อความพร้อมต์ก่อน';pText.focus();return;}
+  if(!sampleFn)return;
+  const useImg=imgOK&&document.getElementById('sendImg').checked&&srcData;
+  convertBtn.disabled=true;edStatus.textContent='Claude กำลังอ่านพร้อมต์และเลือกค่าปรับ…';
+  const input='You translate a photo color-grading prompt into settings for a fixed, deterministic image-grading engine. The engine can only change color, tone, haze, film grain and vignette pixel by pixel. It cannot add, remove or move objects, relight the scene, or use depth.\n\n'+
+    'Return ONLY a JSON object containing every key below as an integer, plus "note": one or two short sentences IN THAI explaining the main choices and naming anything in the prompt the engine cannot do. Leave a key at its neutral value when the prompt does not call for it. Be restrained: typical values are within ±10..60; use extremes only when the prompt clearly demands them.\n\nKeys:\n'+paramGuide()+
+    '\n\nCalibration example. For this prompt:\n"""'+ORIGINAL+'"""\na good answer is '+JSON.stringify(Object.assign({},ORIGINAL_P,{note:'เน้น teal-green ในทุ่งและเงา แตะ olive อุ่นเฉพาะจุดโดนแดด ไฮไลต์ครีมจาง คุมโทนเหลือง หมอกเย็นบางด้านบน เกรนและขอบมืดอ่อน'}))+
+    (useImg?'\n\nThe attached image is a small preview of the photo these settings will be applied to. Use it to calibrate: for example, if it is already warm, use less added warmth; if it is already dark, deepen shadows less. Do not describe the image.':'')+
+    '\n\nPrompt to convert:\n"""'+text+'"""';
+  try{
+    const opts={modelTier:'default'};
+    if(useImg){const c=document.createElement('canvas'),sc=Math.min(1,768/Math.max(srcData.width,srcData.height));c.width=Math.round(srcData.width*sc);c.height=Math.round(srcData.height*sc);c.getContext('2d').drawImage(before,0,0,c.width,c.height);opts.images=[await new Promise(r=>c.toBlob(r,'image/jpeg',0.85))];}
+    const out=await sampleFn.json(input,opts);
+    P=clean(Object.assign({},DEF,out||{}));syncUI();schedule();dirty=true;
+    const note=out&&typeof out.note==='string'?out.note:'';aiNote.textContent=note;aiNote.hidden=!note;
+    edStatus.textContent='ใช้ค่าปรับจากพร้อมต์แล้ว ปรับแถบเลื่อนต่อได้ แล้วกดบันทึก';
+  }catch(e){
+    const c=e&&e.code;
+    edStatus.textContent=c==='not_granted'?'ยังไม่ได้อนุญาตให้หน้านี้เรียก Claude':c==='rate_limited'?'เรียกถี่เกินไป รอสักครู่แล้วลองใหม่':c==='invalid_json'?'Claude ตอบกลับในรูปแบบที่อ่านไม่ได้ ลองกดอีกครั้ง':'แปลงพร้อมต์ไม่สำเร็จ ลองอีกครั้ง';
+  }
+  convertBtn.disabled=false;
+};
+
+// ================= export / import library =================
+async function saveFile(name,data,mime){
+  if(downloads){try{await downloads.save({filename:name,data});return 'saved';}catch(e){if(e&&e.code==='declined')return 'declined';if(e&&e.code==='rate_limited')return 'busy';}}
+  return 'fallback';
+}
+document.getElementById('exportBtn').onclick=async()=>{
+  const data=JSON.stringify({format:'kreadsi-prompts',version:1,prompts:mine.map(p=>({name:p.name,text:p.text,params:p.params,note:p.note||''}))},null,2);
+  if(!mine.length){storeNote.textContent='ยังไม่มีพร้อมต์ของคุณให้ส่งออก';return;}
+  const r=await saveFile('prompt-library.json',data);
+  storeNote.textContent=r==='saved'?'ส่งออก prompt-library.json แล้ว':r==='declined'?'ยกเลิกการส่งออกแล้ว':r==='busy'?'มีหน้าต่างบันทึกค้างอยู่ รอสักครู่':'บันทึกไฟล์ในมุมมองนี้ไม่ได้';
+};
+document.getElementById('importFile').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f||!store)return;
+  try{
+    const j=JSON.parse(await f.text());const arr=Array.isArray(j)?j:j.prompts;if(!Array.isArray(arr))throw 0;
+    let n=0;for(const p of arr){if(!p||typeof p!=='object')continue;await store.add({name:String(p.name||'นำเข้า').slice(0,80),text:String(p.text||'').slice(0,8000),params:clean(p.params),note:String(p.note||'').slice(0,600),createdAt:Date.now()+n,updatedAt:Date.now()});n++;}
+    storeNote.textContent='นำเข้า '+n+' พร้อมต์แล้ว';
+  }catch(err){storeNote.textContent='ไฟล์นี้ไม่ใช่คลังพร้อมต์ที่ส่งออกจากหน้านี้';}
+});
+
+// ================= full-resolution export =================
+const dl=document.getElementById('dl');
+dl.addEventListener('click',async()=>{
+  if(!srcImg)return;dl.disabled=true;
+  try{
+    const c=document.createElement('canvas');c.width=fullW;c.height=fullH;
+    const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(srcImg,0,0);
+    const strip=Math.max(16,Math.floor(2e6/fullW));
+    const det=P.sharpen||P.denoise,out=cx.createImageData(fullW,Math.min(strip,fullH));
+    for(let y=0;y<fullH;y+=strip){const h=Math.min(strip,fullH-y),pt=y>0?1:0,pb=y+h<fullH?1:0,d=cx.getImageData(0,y-pt,fullW,h+pt+pb);
+      if(det)detail(d.data,fullW,h+pt+pb,P,pt,pt+h);
+      const core=d.data.subarray(pt*fullW*4,(pt+h)*fullW*4),od=h===out.height?out:cx.createImageData(fullW,h);
+      grade(core,od.data,fullW,h,y,fullW,fullH,P);cx.putImageData(od,0,y);
+      status.textContent='กำลังประมวลผลความละเอียดเต็ม '+Math.round((y+h)/fullH*100)+'%';await new Promise(r=>setTimeout(r,0));}
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.95));
+    const tag=(pName.value.trim()||'graded').replace(/[\\/:*?"<>|]+/g,'').slice(0,40);
+    const name=srcName+'_'+tag+'.jpg';
+    const r=await saveFile(name,blob);
+    if(r==='saved')status.textContent='บันทึก '+name+' แล้ว';else if(r==='declined')status.textContent='ยกเลิกการบันทึกแล้ว';else if(r==='busy')status.textContent='มีหน้าต่างบันทึกค้างอยู่ รอสักครู่แล้วลองใหม่';else showFallback(blob);
+  }catch(e){status.textContent='ประมวลผลไม่สำเร็จ ภาพอาจใหญ่เกินหน่วยความจำของอุปกรณ์';}
+  dl.disabled=false;
+});
+function showFallback(blob){
+  status.textContent='';const o=document.createElement('div');o.className='overlay';
+  const im=new Image();im.src=URL.createObjectURL(blob);im.alt='ภาพหลังปรับโทนความละเอียดเต็ม';
+  const p=document.createElement('p');p.textContent='คลิกขวาที่ภาพแล้วเลือก “บันทึกรูปภาพ” หรือกดค้างบนมือถือ';
+  const b=document.createElement('button');b.type='button';b.textContent='ปิด';b.onclick=()=>o.remove();
+  o.append(im,p,b);document.body.appendChild(o);b.focus();
+}
+
+// ================= sample landscape =================
+function sample(){
+  const W=1600,H=1000,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  let g=x.createLinearGradient(0,0,0,H*0.45);g.addColorStop(0,'#bfd0d6');g.addColorStop(1,'#e8ecdf');x.fillStyle=g;x.fillRect(0,0,W,H);
+  const ridge=(base,amp,f,col,seed)=>{x.fillStyle=col;x.beginPath();x.moveTo(0,H);for(let i=0;i<=W;i+=8){x.lineTo(i,base+Math.sin(i*f+seed)*amp+Math.sin(i*f*2.7+seed*3)*amp*0.35);}x.lineTo(W,H);x.fill();};
+  ridge(300,40,0.004,'#8ea79a',1);ridge(350,34,0.006,'#6f8f74',4);ridge(410,26,0.009,'#557a52',7);
+  g=x.createLinearGradient(0,420,0,H);g.addColorStop(0,'#7ea24a');g.addColorStop(1,'#4f7a2f');x.fillStyle=g;x.fillRect(0,440,W,H-440);
+  for(let k=0;k<14;k++){const y=450+k*k*3.4;x.strokeStyle=k%2?'rgba(170,190,80,.35)':'rgba(40,80,30,.25)';x.lineWidth=2+k*0.8;x.beginPath();x.moveTo(0,y);x.bezierCurveTo(W*0.3,y-10,W*0.7,y+14,W,y);x.stroke();}
+  [[380,560,260,70],[1150,620,300,80],[820,520,200,40]].forEach(([a,b,rx,ry])=>{const rg=x.createRadialGradient(a,b*rx/ry,0,a,b*rx/ry,rx);rg.addColorStop(0,'rgba(200,210,110,.55)');rg.addColorStop(1,'rgba(200,210,110,0)');x.save();x.scale(1,ry/rx);x.fillStyle=rg;x.beginPath();x.arc(a,b*rx/ry,rx,0,7);x.fill();x.restore();});
+  x.fillStyle='#9fb5b8';x.beginPath();x.moveTo(700,450);x.bezierCurveTo(760,560,520,640,560,760);x.bezierCurveTo(600,880,900,900,980,H);x.lineTo(1260,H);x.bezierCurveTo(1060,880,760,860,720,760);x.bezierCurveTo(680,650,830,560,730,450);x.fill();
+  x.strokeStyle='#d9d0b2';x.lineWidth=6;x.stroke();
+  x.strokeStyle='#c8b98e';x.lineWidth=10;x.beginPath();x.moveTo(120,H);x.bezierCurveTo(260,800,330,640,520,520);x.stroke();
+  const tree=(tx,ty,r)=>{for(let n=0;n<6;n++){x.fillStyle=n<3?'#2e5226':'#3f6a2e';x.beginPath();x.arc(tx+(n%3-1)*r*0.5,ty-(n>2?r*0.5:0),r*(0.7+n*0.05),0,7);x.fill();}x.fillStyle='rgba(150,180,80,.35)';x.beginPath();x.arc(tx-r*0.3,ty-r*0.8,r*0.5,0,7);x.fill();};
+  [[150,520,40],[230,540,30],[1380,500,45],[1460,530,36],[1010,470,22],[320,880,70],[1480,860,80]].forEach(t=>tree(...t));
+  const d=x.getImageData(0,0,W,H);for(let i=0;i<d.data.length;i+=4){const n=(Math.random()-0.5)*14;d.data[i]+=n;d.data[i+1]+=n;d.data[i+2]+=n;}x.putImageData(d,0,0);
+  const img=new Image();img.onload=()=>setSource(img,'sample');img.src=c.toDataURL('image/jpeg',0.92);
+}
+selectPrompt(BUILTIN[0],true);
+sample();
+})();
+</script>

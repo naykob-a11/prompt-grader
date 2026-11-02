@@ -1,0 +1,120 @@
+# 04 · สเปกเครื่องยนต์เกรดสี (Grading Engine Spec)
+
+> สเปกนี้ถอดจากต้นแบบ `reference/prototype-v3.html` (ฟังก์ชัน `detail()`, `grayWorld()`, `grade()`) ซึ่งถือเป็น **พฤติกรรมอ้างอิง** CPU engine ต้องให้ผลเหมือนต้นแบบ ส่วน GPU engine ต้องให้ผลเหมือน CPU ภายในความคลาดเคลื่อนที่กำหนด
+
+## 0. สัญลักษณ์
+
+- ค่าสี `r, g, b ∈ [0,1]` (sRGB ไม่แปลงเป็น linear — ตั้งใจให้ตรงกับต้นแบบ)
+- `L(r,g,b) = 0.2126r + 0.7152g + 0.0722b`
+- `S(a,b,x)` = smoothstep: `t = clamp((x−a)/(b−a),0,1); t²(3−2t)`
+- พารามิเตอร์ `p.key` เป็นจำนวนเต็มตาม schema; `n(k) = p.k/100`
+- `hueOff(θ)` = เวกเตอร์ RGB ของ hue θ ที่ s=1,v=1 ลบด้วยค่าเฉลี่ยของสามช่อง (ผลรวมเป็น 0)
+- `(x, y)` พิกัดพิกเซลในภาพเต็ม, `W, H` ขนาดภาพเต็ม (แม้กำลังประมวลผลไทล์หรือแถบ)
+
+## 1. Pass 0 — Detail (denoise + sharpen) · ต้องใช้พิกเซลข้างเคียง
+
+ทำเมื่อ `sharpen > 0` หรือ `denoise > 0` ก่อน pass อื่น ใช้ค่าจากต้นฉบับ
+1. `B` = ค่าเฉลี่ย box 3×3 ของแต่ละช่อง (ขอบภาพใช้ clamp-to-edge)
+2. `dl = |L(P − B)|` (หน่วย 0..1)
+3. `wn = n(denoise)·0.85·(1 − S(0.015, 0.07, dl))` — เกลี่ยเฉพาะบริเวณเรียบ
+4. `ws = n(sharpen)·1.6·S(0.01, 0.045, dl)` — คมเฉพาะบริเวณที่มีขอบ
+5. `P' = P + (B − P)·wn + (P − B)·ws`
+
+> หมายเหตุ: รัศมี 3×3 ทำงานในหน่วยพิกเซลของภาพที่ประมวลผล พรีวิวที่ย่อแล้วจึงดูคมต่างจากไฟล์เต็ม งานต่อยอด: ปรับรัศมีตามสเกล (`radius = 1 × fullW/previewW` สำหรับพรีวิว)
+
+## 2. Pass 1 — Grade ต่อพิกเซล
+
+### 2.1 Exposure, White balance, Cast fix
+```
+ex = 2^(p.exposure/100)                 # ±100 = ±1 stop
+cf = n(castFix); G = wbGains (จาก gray-world)
+wr = (1 + 0.12·temp + 0.03·tint)·(1 + (G.r−1)·cf)
+wg = (1 − 0.08·tint)               ·(1 + (G.g−1)·cf)
+wb = (1 − 0.12·temp + 0.03·tint)·(1 + (G.b−1)·cf)
+r = min(1, r0·ex·wr) ... (เช่นเดียวกันทุกช่อง)
+```
+**Gray-world gains:** สุ่มทุก 4 พิกเซลของพรีวิว เลือกเฉพาะ `0.12 < L < 0.9`; `m = (r̄+ḡ+b̄)/3`; `G = clamp(m/c̄, 0.75, 1.35)` ต่อช่อง; ถ้าไม่มีพิกเซลที่ผ่านเกณฑ์ `G = (1,1,1)`
+
+### 2.2 Dehaze
+```
+dz = n(dehaze)·0.18; A = 0.8
+c = clamp((c − dz·A)/(1 − dz), 0, 1)
+```
+
+### 2.3 HSV stage
+แปลงเป็น HSV (`h` องศา, `s`, `v`) แล้ว:
+1. **แถบสี 6 แถบ** ศูนย์กลาง R=0°, Y=50°, G=115°, A=180°, B=225°, P=285°; ความกว้างสามเหลี่ยม ±45°
+   `w_k = max(0, 1 − |Δh|/45)·min(1, 4s)` (ระยะ hue วนรอบ 360)
+   `dh += w_k·hue_k·0.30` (หน่วย hue_k = ค่าแถบ ±100 → ±30°), `ds += w_k·sat_k/100`, `dl += w_k·lum_k/100`
+2. **มาสก์ใบไม้** `fw`: ถ้า `45<h<190`: `h<80 ? S(45,80,h) : h>150 ? 1−S(150,190,h) : 1`; คูณ `min(1, 3.2s)`
+   `lit = S(0.42, 0.82, L0)` (L0 = luminance หลังขั้น 2.1)
+   `dh += fw·((1−lit)·n(teal)·34 − lit·n(sun)·(h>80 ? min(28,(h−72)·0.55) : 0))`
+3. `h = (h + dh) mod 360`
+4. `s *= (1+ds)·(1 − fw·0.10·n(teal)·(1−lit))·(1 + fw·0.06·n(sun)·lit)`
+5. **Vibrance** `vb=n(vibrance)`: `vb≥0 ? s + vb·s(1−s)·1.5 : s·(1 + vb(1 − 0.5s))`; clamp 0..1
+6. `v *= (1 + 0.35·dl)·(1 − fw·n(forest)·0.22·(1−L0)·(1 − 0.6·lit))`; clamp 0..1
+7. กลับเป็น RGB
+
+### 2.4 Global saturation (รักษาความสว่าง)
+`Ls = L(r,g,b); c = Ls + (c − Ls)·(1 + n(saturation))` — ค่า −100 ให้ภาพขาวดำตาม luminance
+
+### 2.5 Tone (บน luminance แล้วสเกล RGB เพื่อรักษา hue)
+```
+L  = L(r,g,b); Ln = L
+Ln += n(highlights)·0.20·S(0.5, 1, L)
+Ln += n(shadows)·0.25·(1−L)²·(1 − S(0.4, 0.75, L))
+t  = Ln − 0.5; Ln = 0.5 + t·(1 + n(contrast)·0.7·(1 − 4t²))
+Ln = clamp(Ln, 0, 1.05)
+if L > 1e-4: c *= Ln/L  else c = Ln
+```
+
+### 2.6 Split toning
+```
+sw = (1−Ln)²·(1 − S(0.5, 0.8, Ln));  hw = S(0.55, 0.98, Ln)
+c += hueOff(shHue)_c·n(shSat)·0.16·sw + hueOff(hiHue)_c·n(hiSat)·0.13·hw
+```
+
+### 2.7 Yellow guard
+```
+y = min(r,g) − b − 0.10
+if y > 0: f = y·n(guard)·0.55·S(0.25,0.7,Ln); r −= 0.9f; g −= 0.55f; b += 0.25f
+```
+
+### 2.8 Haze (ขึ้นกับตำแหน่ง)
+```
+reach = 0.15 + n(reach)·0.75
+hz = max(0, 1 − (y/H)/reach)^1.5 · n(haze)·0.6
+L3 = L(r,g,b); tg = 0.55 + 0.35·L3; hT = n(hazeTemp)
+r += (tg + 0.04hT − r)·hz;  g += (tg − g)·hz;  b += (tg − 0.05hT − b)·hz
+```
+
+### 2.9 Fade, Vignette, Grain
+```
+fade:     fl = n(fade)·0.07;  c = fl + c·(1 − 1.1fl)
+vignette: d = dist((x,y),(W/2,H/2)) / dist((0,0),(W/2,H/2))
+          c *= 1 − n(vignette)·0.5·S(0.38, 1.05, d)
+grain:    noise = (hash(x,y) + hash(x+1, y+7) − 1)·n(grain)·0.075·(1 − min(1, |L4−0.45|·1.4))
+          c += noise  (เท่ากันทุกช่อง = luma grain)
+```
+`hash` ฝั่ง CPU: integer hash (`Math.imul`) ตามต้นแบบ; ฝั่ง GPU: hash แบบ float ที่ให้การกระจายใกล้เคียง (ตรวจเชิงสถิติ: ค่าเฉลี่ย ≈ 0, ส่วนเบี่ยงเบนต่างไม่เกิน 10%)
+
+### 2.10 Mix และเขียนผล
+`out = 255·(c0 + (c − c0)·n(amount))` โดย `c0` คือพิกเซลต้นฉบับ **ก่อน Pass 0** แล้วแปลงเป็น uint8 ตามกติกา `Uint8ClampedArray`: clamp 0..255 แล้วปัดเข้าจำนวนเต็มใกล้สุด ค่ากึ่งกลางพอดีปัดไปหาเลขคู่ (0.5→0, 1.5→2, 2.5→2)
+
+> **ต่างจากต้นแบบโดยตั้งใจ:** ต้นแบบผสมกับภาพหลัง detail จึงยังคมหรือเกลี่ยอยู่แม้ `amount=0` ซึ่งขัดกับ I2 สูตรนี้ให้ผลเท่าต้นแบบเมื่อ `amount=100` หรือ `sharpen=denoise=0`
+
+## 3. Invariants และการทดสอบที่ต้องมี
+
+| # | ข้อกำหนด | test |
+|---|---|---|
+| I1 | ค่าเป็นกลางทั้งหมด → ผลเท่าต้นฉบับทุกพิกเซล | `identity.test.ts` |
+| I2 | `amount=0` → ต้นฉบับ แม้ตั้ง `sharpen`/`denoise` ไว้ | `identity.test.ts` |
+| I3 | ทุกพารามิเตอร์ที่ค่า min/max → ไม่มี NaN, ค่าอยู่ใน 0..255 | `extremes.test.ts` |
+| I4 | ประมวลผลแบบแถบ/ไทล์ = ประมวลผลทั้งภาพ (รวม detail ที่ขอบแถบ) | `tiling.test.ts` |
+| I5 | GPU vs CPU: max abs diff ≤ 2/255 เมื่อ grain=0 | `tests/e2e/parity.spec.ts` (Playwright) |
+| I6 | golden images ของพรีเซ็ตในตัว 6 แบบ × ภาพทดสอบ 4 ภาพ: PSNR ≥ 45 dB เทียบภาพอ้างอิง | `golden.test.ts` |
+| I7 | `saturation=−100` → r=g=b ทุกพิกเซล | `bw.test.ts` |
+
+## 4. การเปลี่ยนแปลงสูตร
+
+ทุกการเปลี่ยนสูตรต้อง: (1) แก้ทั้ง CPU และ GLSL ใน commit เดียว (2) อัปเดตเอกสารนี้ (3) สร้าง golden ใหม่ด้วย `pnpm golden:update` พร้อมแนบภาพเทียบก่อน/หลังใน PR (4) เพิ่ม `schemaVersion` ถ้าความหมายของค่าเดิมเปลี่ยน — ใช้ skill `grading-engine`

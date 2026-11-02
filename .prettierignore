@@ -1,0 +1,11 @@
+reference/
+docs/
+seed/
+.claude/
+tests/golden/
+playwright-report/
+test-results/
+dist/
+pnpm-lock.yaml
+.env*
+*.md
