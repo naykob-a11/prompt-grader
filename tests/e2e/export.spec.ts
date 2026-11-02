@@ -7,7 +7,7 @@ import { buildExif, exifTags } from './support/exifFixture';
 const FIXTURE = 'tests/fixtures/images/synthetic-ramps.png';
 const GOLDEN_B1 = 'tests/golden/b1__synthetic-ramps.png';
 
-const imageInput = (page: Page) => page.locator('input[accept="image/*"]');
+const imageInput = (page: Page) => page.locator('.topbar input[type=file]');
 const info = (page: Page) => page.getByTestId('stage-info');
 const exportNow = (page: Page) =>
   page.getByRole('button', { name: 'ส่งออกภาพความละเอียดเต็ม' }).click();

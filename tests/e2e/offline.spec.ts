@@ -19,7 +19,7 @@ test('every feature works with the network off', async ({ page, context }) => {
   await expect(page.getByTestId('stage-info')).not.toBeEmpty();
 
   // Open an image, and grade it with a preset and a slider.
-  await page.locator('input[accept="image/*"]').setInputFiles(FIXTURE);
+  await page.locator('.topbar input[type=file]').setInputFiles(FIXTURE);
   await expect(page.getByTestId('stage-info')).toContainText('synthetic-ramps.png');
   await page.getByRole('button', { name: /^Teal & Orange/ }).click();
   await page.getByLabel('ความสว่าง (EV)').fill('25');

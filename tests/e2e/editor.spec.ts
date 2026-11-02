@@ -5,7 +5,7 @@ const after = (page: Page) => page.getByTestId('stage-after');
 
 async function openFixture(page: Page) {
   await page.goto('/');
-  await page.locator('input[accept="image/*"]').setInputFiles(FIXTURE);
+  await page.locator('.topbar input[type=file]').setInputFiles(FIXTURE);
   await expect(page.getByTestId('stage-info')).toContainText('synthetic-ramps.png');
   await page.getByRole('button', { name: 'หลังปรับ' }).click();
 }
@@ -130,7 +130,7 @@ test('a dropped or pasted image opens, and a non-image file gives a helpful mess
   );
   await expect(page.getByTestId('stage-info')).toContainText('pasted.png');
 
-  await page.locator('input[accept="image/*"]').setInputFiles({
+  await page.locator('.topbar input[type=file]').setInputFiles({
     name: 'notes.txt',
     mimeType: 'text/plain',
     buffer: Buffer.from('not a picture'),

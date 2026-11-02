@@ -59,6 +59,7 @@ prompt-grader/
 │       │   ├── sgp/{vocabulary,parse,serialize,suggest,template}.ts
 │       │   ├── math.ts                smoothstep, hueOffset, hash2
 │       │   ├── stats/{grayWorld,histogram,imageStats}.ts
+│       │   ├── match/{toneMatch,worker,matchInWorker}.ts  จับคู่โทนจากภาพอ้างอิง
 │       │   ├── types.ts, createRenderer.ts
 │       │   ├── cpu/{grade,detail,worker,cpuRenderer}.ts
 │       │   └── gl/{renderer,uniforms,tiles}.ts + shaders/{fullscreen.vert,detail.frag,grade.frag}
@@ -78,11 +79,11 @@ prompt-grader/
 │           ├── theme/tokens.css
 │           ├── store/{editorStore,libraryStore,promptStore,exportStore}.ts
 │           ├── storage/{db,settings,libraryFile}.ts
-│           ├── services/{imageIO,openImage,sampleImage,exportImage,exif,prompts,promptSync,promptFiles,builtinText,clipboard,download}.ts
+│           ├── services/{imageIO,openImage,sampleImage,exportImage,exif,prompts,promptSync,promptFiles,referenceTone,builtinText,clipboard,download}.ts
 │           ├── features/
 │           │   ├── stage/             Stage (canvas, ซูม/เลื่อน), CompareSlider, Histogram, useRenderer
 │           │   ├── controls/          Controls, ParamGroup, ParamSlider (รวมแถบสี kind: 'hue')
-│           │   ├── library/           LibraryPanel, PromptItem, SaveBar, ImportExport
+│           │   ├── library/           LibraryPanel, PromptItem, SaveBar, ReferenceTone, ImportExport
 │           │   ├── prompt-editor/     PromptPanel, PromptEditor, sgpLanguage, WarningList,
 │           │   │                      ChatBridgeDialog, NotesPanel
 │           │   └── export/            ExportDialog
